@@ -26,8 +26,17 @@ jobs:
       - name: Compilation
         run: ./gradlew clean assemble
 
-      - name: Tests unitaires
+      - name: Tests
         run: ./gradlew test
+
+      - name: Construire le jar
+        run: ./gradlew jar
+
+      - name: Upload jar artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-jar
+          path: build/libs/*.jar
 
   smoke-test:
     needs: build
@@ -48,11 +57,11 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Rendre gradlew exécutable
-        run: chmod +x ./gradlew
-
-      - name: Construire le jar exécutable
-        run: ./gradlew clean jar
+      - name: Download jar artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-jar
+          path: build/libs
 
       - name: Démarrer l'application
         run: |
