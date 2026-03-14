@@ -26,5 +26,25 @@ jobs:
       - name: Compilation
         run: ./gradlew clean assemble
 
-      - name: Tests
+      - name: Tests unitaires
         run: ./gradlew test
+
+  smoke-test:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v5
+
+      - name: Installer Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Rendre gradlew exécutable
+        run: chmod +x ./gradlew
+
+      - name: Smoke test
+        run: echo "Smoke test à définir"
