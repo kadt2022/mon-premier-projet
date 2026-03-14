@@ -43,36 +43,46 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Rendre gradlew exécutable
         run: chmod +x ./gradlew
 
-      - name: Construire le jar
-        run: ./gradlew clean bootJar
+      - name: Construire le jar exécutable
+        run: ./gradlew clean jar
 
-      - name: Démarrer l’application
+      - name: Démarrer l'application
         run: |
           java -jar build/libs/*.jar > app.log 2>&1 &
           echo $! > app.pid
 
-      - name: Attendre que l’application démarre
+      - name: Attendre que l'application démarre
         run: |
           for i in {1..30}; do
             if curl -fsS http://127.0.0.1:8080/api/ui/bootstrap > /dev/null; then
+              echo "Application démarrée"
               exit 0
             fi
             sleep 2
           done
-          echo "Application non démarrée"
+          echo "L'application n'a pas démarré à temps"
           cat app.log
           exit 1
 
       - name: Installer Newman
         run: npm install -g newman
 
-      - name: Lancer les smoke tests Postman
+      - name: Exécuter la collection Postman
         run: newman run postman/smoke.postman_collection.json --env-var baseUrl=http://127.0.0.1:8080
 
-      - name: Arrêter l’application
+      - name: Afficher les logs en cas d'échec
+        if: failure()
+        run: cat app.log
+
+      - name: Arrêter l'application
         if: always()
         run: |
           kill $(cat app.pid) || true
