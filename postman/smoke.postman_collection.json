@@ -1,0 +1,125 @@
+{
+  "info": {
+    "_postman_id": "0f2d4e0d-3d4b-4b0c-9c78-ef8f4b9f8b2a",
+    "name": "SFTP Server Smoke",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Minimal smoke tests for the embedded web API."
+  },
+  "item": [
+    {
+      "name": "Bootstrap responds",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/ui/bootstrap",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "ui",
+            "bootstrap"
+          ]
+        },
+        "description": "Verifies that the application starts and exposes the bootstrap API."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "",
+              "pm.test(\"Response contains summary\", function () {",
+              "    pm.expect(json).to.have.property(\"summary\");",
+              "    pm.expect(json.summary).to.have.property(\"authMode\");",
+              "    pm.expect(json.summary).to.have.property(\"sftpPort\");",
+              "});",
+              "",
+              "pm.test(\"Response contains explorer and audit sections\", function () {",
+              "    pm.expect(json).to.have.property(\"explorer\");",
+              "    pm.expect(json).to.have.property(\"audit\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login succeeds",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/ui/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "ui",
+            "login"
+          ]
+        },
+        "description": "Verifies that the demo web login accepts valid credentials."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "",
+              "pm.test(\"Login returns ok=true\", function () {",
+              "    pm.expect(json.ok).to.eql(true);",
+              "});",
+              "",
+              "pm.test(\"Login returns the requested user\", function () {",
+              "    pm.expect(json.username).to.eql(pm.collectionVariables.get(\"username\") || pm.variables.get(\"username\"));",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8080"
+    },
+    {
+      "key": "username",
+      "value": "user"
+    },
+    {
+      "key": "password",
+      "value": "password"
+    }
+  ]
+}
