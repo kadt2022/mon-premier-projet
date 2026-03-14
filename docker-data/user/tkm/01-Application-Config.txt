@@ -1,0 +1,549 @@
+// ======= Takibu IAM - Application & Config Bundle =======
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\build\generated\sources\annotationProcessor\java\main\com\takibu\identitycore\application\mapper\UserMapperImpl.java =====
+
+package com.takibu.identitycore.application.mapper;
+
+import com.takibu.identitycore.domain.model.EmailAddress;
+import com.takibu.identitycore.domain.model.SpaceId;
+import com.takibu.identitycore.domain.model.User;
+import com.takibu.identitycore.domain.model.UserId;
+import com.takibu.identitycore.domain.model.UserStatus;
+import com.takibu.identitycore.interfaces.rest.response.UserResponse;
+import java.time.Instant;
+import java.util.UUID;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = "org.mapstruct.ap.MappingProcessor",
+    date = "2025-08-31T09:20:18-0400",
+    comments = "version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-8.14.3.jar, environment: Java 21.0.2 (Oracle Corporation)"
+)
+@Component
+public class UserMapperImpl implements UserMapper {
+
+    @Override
+    public UserResponse toUserResponse(User user, EmailAddress email) {
+        if ( user == null && email == null ) {
+            return null;
+        }
+
+        UUID id = null;
+        UUID spaceId = null;
+        String username = null;
+        String firstName = null;
+        String lastName = null;
+        UserStatus status = null;
+        boolean mfaEnabled = false;
+        boolean passwordExpired = false;
+        Instant lastLoginAt = null;
+        Instant createdAt = null;
+        Instant updatedAt = null;
+        Long version = null;
+        if ( user != null ) {
+            id = userIdValue( user );
+            spaceId = userSpaceIdValue( user );
+            username = user.getUsername();
+            firstName = user.getFirstName();
+            lastName = user.getLastName();
+            status = user.getStatus();
+            mfaEnabled = user.isMfaEnabled();
+            passwordExpired = user.isPasswordExpired();
+            lastLoginAt = user.getLastLoginAt();
+            createdAt = user.getCreatedAt();
+            updatedAt = user.getUpdatedAt();
+            version = user.getVersion();
+        }
+        String email1 = null;
+        if ( email != null ) {
+            email1 = email.value();
+        }
+
+        UserResponse userResponse = new UserResponse( id, spaceId, username, email1, firstName, lastName, status, mfaEnabled, passwordExpired, lastLoginAt, createdAt, updatedAt, version );
+
+        return userResponse;
+    }
+
+    private UUID userIdValue(User user) {
+        UserId id = user.getId();
+        if ( id == null ) {
+            return null;
+        }
+        return id.value();
+    }
+
+    private UUID userSpaceIdValue(User user) {
+        SpaceId spaceId = user.getSpaceId();
+        if ( spaceId == null ) {
+            return null;
+        }
+        return spaceId.value();
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\IdentityCoreApplication.java =====
+
+package com.takibu.identitycore;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class IdentityCoreApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(IdentityCoreApplication.class, args);
+	}
+
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\application\command\CreateUserCommandV2.java =====
+
+package com.takibu.identitycore.application.command;
+
+import com.takibu.identitycore.interfaces.rest.request.CreateUserRequestV2;
+
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+
+public record CreateUserCommandV2(
+        UUID spaceId,
+        UUID accountId,
+        String email,
+        String rawPassword,
+        String username,
+        String firstName,
+        String lastName,
+        List<String> roleNames,
+        List<String> groupCodes,
+        Map<String, Object> metadata
+) {
+    public static CreateUserCommandV2 from(UUID spaceId, CreateUserRequestV2 r) {
+
+        List<String> roleNames = r.initialAssignments() != null && r.initialAssignments().roleNames() != null
+                ? r.initialAssignments().roleNames()
+                : List.of();
+
+        List<String> groupCodes = r.initialAssignments() != null && r.initialAssignments().groupCodes() != null
+                ? r.initialAssignments().groupCodes()
+                : List.of();
+
+        return new CreateUserCommandV2(
+                spaceId,
+                r.accountId(),
+                r.email(),
+                r.rawPassword(),
+                r.username(),
+                r.firstName(),
+                r.lastName(),
+                roleNames,
+                groupCodes,
+                r.metadata()
+        );
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\application\mapper\UserMapper.java =====
+
+package com.takibu.identitycore.application.mapper;
+
+import com.takibu.identitycore.domain.model.*;
+import com.takibu.identitycore.interfaces.rest.response.UserResponse;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
+
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.ERROR)
+public interface UserMapper {
+
+    @Mapping(target = "id",            source = "user.id.value")
+    @Mapping(target = "spaceId",       source = "user.spaceId.value")
+    @Mapping(target = "username",      source = "user.username")
+    @Mapping(target = "email",         source = "email.value")   // <-- vient de Account
+    @Mapping(target = "firstName",     source = "user.firstName")
+    @Mapping(target = "lastName",      source = "user.lastName")
+    @Mapping(target = "status",        source = "user.status")
+    @Mapping(target = "mfaEnabled",    source = "user.mfaEnabled")
+    @Mapping(target = "passwordExpired", source = "user.passwordExpired")
+    @Mapping(target = "lastLoginAt",   source = "user.lastLoginAt")
+    @Mapping(target = "createdAt",     source = "user.createdAt")
+    @Mapping(target = "updatedAt",     source = "user.updatedAt")
+    @Mapping(target = "version",       source = "user.version")
+    UserResponse toUserResponse(User user, EmailAddress email);
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\application\service\GroupMembershipService.java =====
+
+package com.takibu.identitycore.application.service;
+
+import com.takibu.identitycore.domain.exception.UserCreationException;
+import com.takibu.identitycore.domain.model.SpaceId;
+import com.takibu.identitycore.domain.model.UserId;
+import com.takibu.identitycore.infrastructure.entity.GroupEntity;
+import com.takibu.identitycore.infrastructure.entity.GroupMemberEntity;
+import com.takibu.identitycore.infrastructure.jpa.repository.GroupJpaRepository;
+import com.takibu.identitycore.infrastructure.jpa.repository.GroupMemberJpaRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Clock;
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class GroupMembershipService {
+
+    private final GroupJpaRepository groupRepo;
+    private final GroupMemberJpaRepository groupMemberRepo;
+    private final Clock clock;
+
+    @Transactional
+    public void addToGroups(SpaceId spaceId, UserId userId, List<String> groupCodes) {
+        if (groupCodes == null || groupCodes.isEmpty()) return;
+
+        List<String> cleaned = groupCodes.stream()
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .distinct()
+                .toList();
+        if (cleaned.isEmpty()) return;
+
+        UUID space = spaceId.value();
+        UUID user  = userId.value();
+
+        // RÃ©sout les groupes par code
+        List<GroupEntity> groups = groupRepo.findBySpaceIdAndCodeIn(space, cleaned);
+        Map<String, UUID> codeToGroupId = groups.stream()
+                .collect(Collectors.toMap(GroupEntity::getCode, GroupEntity::getId));
+
+        // VÃ©rifie les manquants
+        List<String> missing = cleaned.stream()
+                .filter(code -> !codeToGroupId.containsKey(code))
+                .toList();
+        if (!missing.isEmpty()) {
+            throw new UserCreationException("Unknown group codes in space " + space + ": " + missing);
+        }
+
+        // InsÃ¨re les liaisons manquantes
+        Instant now = clock.instant();
+        List<GroupMemberEntity> toInsert = new ArrayList<>();
+        for (String code : cleaned) {
+            UUID groupId = codeToGroupId.get(code);
+            boolean exists = groupMemberRepo.existsBySpaceIdAndUserIdAndGroupId(space, user, groupId);
+            if (!exists) {
+                toInsert.add(GroupMemberEntity.builder()
+                        // GroupMemberEntity a @UuidGenerator -> on laisse id = null
+                        .spaceId(space)
+                        .userId(user)
+                        .groupId(groupId)
+                        .assignedAt(now)
+                        .assignedBy(null)
+                        .build());
+            }
+        }
+        if (!toInsert.isEmpty()) {
+            groupMemberRepo.saveAll(toInsert);
+        }
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\application\service\RoleAssignmentService.java =====
+
+package com.takibu.identitycore.application.service;
+
+import com.takibu.identitycore.domain.exception.UserCreationException;
+import com.takibu.identitycore.domain.model.SpaceId;
+import com.takibu.identitycore.domain.model.UserId;
+import com.takibu.identitycore.infrastructure.entity.RoleEntity;
+import com.takibu.identitycore.infrastructure.entity.UserRoleEntity;
+import com.takibu.identitycore.infrastructure.jpa.repository.RoleJpaRepository;
+import com.takibu.identitycore.infrastructure.jpa.repository.UserRoleJpaRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Clock;
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class RoleAssignmentService {
+
+    private final RoleJpaRepository roleRepo;
+    private final UserRoleJpaRepository userRoleRepo;
+    private final Clock clock;
+
+    @Transactional
+    public void assignRoles(SpaceId spaceId, UserId userId, List<String> roleCodes) {
+        if (roleCodes == null || roleCodes.isEmpty()) return;
+
+        // Normalise et dÃ©duplique
+        List<String> cleaned = roleCodes.stream()
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .distinct()
+                .toList();
+        if (cleaned.isEmpty()) return;
+
+        UUID space = spaceId.value();
+        UUID user  = userId.value();
+
+        // RÃ©sout les roles par code
+        List<RoleEntity> roles = roleRepo.findBySpaceIdAndCodeIn(space, cleaned);
+        Map<String, UUID> codeToRoleId = roles.stream()
+                .collect(Collectors.toMap(RoleEntity::getCode, RoleEntity::getId));
+
+        // VÃ©rifie les manquants
+        List<String> missing = cleaned.stream()
+                .filter(code -> !codeToRoleId.containsKey(code))
+                .toList();
+        if (!missing.isEmpty()) {
+            throw new UserCreationException("Unknown role codes in space " + space + ": " + missing);
+        }
+
+        // InsÃ¨re les liaisons manquantes
+        Instant now = clock.instant();
+        List<UserRoleEntity> toInsert = new ArrayList<>();
+        for (String code : cleaned) {
+            UUID roleId = codeToRoleId.get(code);
+            boolean exists = userRoleRepo.existsBySpaceIdAndUserIdAndRoleId(space, user, roleId);
+            if (!exists) {
+                toInsert.add(UserRoleEntity.builder()
+                        .id(UUID.randomUUID())          // pas de @UuidGenerator, on fixe l'id ici
+                        .spaceId(space)
+                        .userId(user)
+                        .roleId(roleId)
+                        .assignedAt(now)
+                        .assignedBy(null)               // branchement futur si on a l'acteur
+                        .build());
+            }
+        }
+        if (!toInsert.isEmpty()) {
+            userRoleRepo.saveAll(toInsert);
+        }
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\application\service\UserOnboardingApplicationService.java =====
+
+package com.takibu.identitycore.application.service;
+
+import com.takibu.identitycore.application.command.CreateUserCommandV2;
+import com.takibu.identitycore.application.mapper.UserMapper;
+import com.takibu.identitycore.domain.exception.PasswordPolicyViolationException;
+import com.takibu.identitycore.domain.exception.SpaceNotFoundException;
+import com.takibu.identitycore.domain.exception.UserAlreadyExistsException;
+import com.takibu.identitycore.domain.exception.UserCreationException;
+import com.takibu.identitycore.domain.model.*;
+import com.takibu.identitycore.domain.passwordpolicy.PasswordPolicy;
+import com.takibu.identitycore.domain.repository.AccountCredentialsRepository;
+import com.takibu.identitycore.domain.repository.AccountRepository;
+import com.takibu.identitycore.domain.repository.UserRepository;
+import com.takibu.identitycore.interfaces.rest.response.UserResponse;
+import com.takibu.identitycore.port.SpaceManagementPort;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import java.time.Clock;
+import java.util.Map;
+import java.util.Objects;
+
+
+
+@Service
+@RequiredArgsConstructor
+public class UserOnboardingApplicationService {
+
+    private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
+    private final AccountCredentialsRepository accountCredentialsRepository;
+    private final PasswordHasher passwordHasher;
+    private final PasswordPolicy passwordPolicy;
+    private final SpaceManagementPort spaceManagementPort;
+    private final UserMapper userMapper;
+    private final RoleAssignmentService roleAssignmentService;
+    private final GroupMembershipService groupMembershipService;
+    private final Clock clock;
+
+
+    /**
+     * Main V2 flow â€” create or attach Account, then create Space-scoped User.
+     */
+    @Transactional
+    public UserResponse createUserV2(CreateUserCommandV2 c) {
+        Objects.requireNonNull(c, "command");
+        SpaceId spaceId = new SpaceId(c.spaceId());
+        assertSpaceExists(spaceId);
+
+        // Resolve or create Account
+        Account account = resolveOrCreateAccount(c);
+
+        // Uniqueness in space
+        assertUserNotExistsInSpace(spaceId, account.getId());
+        assertUsernameFree(spaceId, c.username());
+
+        // Build & persist User (domain â†’ entity)
+        User user = User.create(
+                UserId.generate(),
+                spaceId,
+                account.getId(),
+                c.username(),
+                c.firstName(),
+                c.lastName(),
+                UserStatus.PENDING_ACTIVATION,
+                false,
+                false,
+                null,
+                clock.instant(),
+                clock.instant(),
+                c.metadata()
+        );
+        User saved = userRepository.save(user);
+
+        // Apply initial assignments (roles/groups) â€” placeholders (implement services later)
+        roleAssignmentService.assignRoles(spaceId, saved.getId(), c.roleNames());
+        groupMembershipService.addToGroups(spaceId, saved.getId(), c.groupCodes());
+
+        // Build response (email from Account)
+        return userMapper.toUserResponse(saved, account.getEmail());
+
+    }
+
+    private void assertSpaceExists(SpaceId spaceId) {
+        if (!spaceManagementPort.doesSpaceExist(spaceId)) {
+            throw new SpaceNotFoundException("Space " + spaceId.value() + " not found");
+        }
+    }
+
+    private void assertUsernameFree(SpaceId spaceId, String username) {
+        if (userRepository.findByUsername(spaceId, username).isPresent()) {
+            throw new UserAlreadyExistsException("Username '" + username + "' already exists in this space");
+        }
+    }
+
+
+    private void assertUserNotExistsInSpace(SpaceId spaceId, AccountId accountId) {
+        if (userRepository.existsBySpaceAndAccount(spaceId, accountId)) {
+            throw new UserAlreadyExistsException("Account already has a profile in this space");
+        }
+    }
+
+    private Account resolveOrCreateAccount(CreateUserCommandV2 c) {
+        if (c.accountId() != null) {
+            return accountRepository.findById(AccountId.of(c.accountId()))
+                    .orElseThrow(() -> new UserCreationException("Account not found: " + c.accountId()));
+        }
+        // else must provide email + rawPassword
+        if (c.email() == null || c.rawPassword() == null) {
+            throw new UserCreationException("Either accountId OR (email + rawPassword) must be provided");
+        }
+        EmailAddress email = new EmailAddress(c.email());
+        return accountRepository.findByEmail(email).orElseGet(() -> createAccountWithCredentials(email, c.rawPassword(), Map.of()));
+    }
+
+    private Account createAccountWithCredentials(EmailAddress email, String rawPassword, Map<String, Object> metadata) {
+        if (!passwordPolicy.isValid(rawPassword)) {
+            throw new PasswordPolicyViolationException("Password does not meet policy");
+        }
+        Account account = Account.create(email, null, null, metadata);
+        // Sauvegarde initiale de l'objet Account. C'est la seule fois qu'on le fait.
+        account = accountRepository.save(account);
+
+        PasswordHash pwd = PasswordHash.of(passwordHasher.hash(rawPassword), "bcrypt", 1);
+        AccountCredentials accountCredentials = AccountCredentials.builder()
+                .accountId(account.getId())
+                .passwordHash(pwd)
+                .passwordUpdatedAt(clock.instant())
+                .mustChangeNextLogin(false)
+                .failedAttempts(0)
+                .lockedUntil(null)
+                .createdAt(clock.instant())
+                .updatedAt(clock.instant())
+                .version(0L)
+                .build();
+        // Sauvegarde des credentials, sans toucher Ã  l'Account.
+        accountCredentialsRepository.save(accountCredentials);
+        return account;
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\config\PasswordEncoderConfig.java =====
+
+package com.takibu.identitycore.config;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+@Configuration
+public class PasswordEncoderConfig {
+
+    // Force par dÃ©faut = 12 (robuste, mais ajuste si besoin)
+    @Bean
+    public PasswordEncoder passwordEncoder(
+            @Value("${security.password-encoder.bcrypt-strength:12}") int strength
+    ) {
+        return new BCryptPasswordEncoder(strength);
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\config\SecurityConfig.java =====
+
+package com.takibu.identitycore.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+
+/**
+ * Configuration de sÃ©curitÃ© pour permettre toutes les requÃªtes.
+ * Ceci est pour des fins de dÃ©veloppement/test initial et devrait Ãªtre renforcÃ© en production.
+ */
+@Configuration
+@EnableWebSecurity // Active la configuration de sÃ©curitÃ© web de Spring
+public class SecurityConfig {
+
+    // Configure la chaÃ®ne de filtres de sÃ©curitÃ©
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(AbstractHttpConfigurer::disable) // DÃ©sactive la protection CSRF pour simplifier les tests Postman
+                .authorizeHttpRequests(authorize -> authorize
+                        .anyRequest().permitAll() // Autorise toutes les requÃªtes sans authentification
+                );
+        return http.build();
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\config\TimeConfig.java =====
+
+package com.takibu.identitycore.config;
+
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Spring config utilitaire (Clock bean) â€” optionnel
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import java.time.Clock;
+
+@Configuration
+public class TimeConfig {
+    @Bean Clock systemClock() { return Clock.systemUTC(); }
+}

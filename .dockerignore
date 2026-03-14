@@ -1,0 +1,9 @@
+.gradle
+.idea
+build
+docker-data
+out
+sftp-root
+*.iml
+*.log
+upload-test.txt

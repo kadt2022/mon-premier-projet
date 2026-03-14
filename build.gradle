@@ -1,0 +1,59 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'com.example'
+version = '1.0.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+application {
+    mainClass = 'com.example.sftp.SftpServerApp'
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    sshdVersion = '2.13.0'
+}
+
+dependencies {
+    // Apache MINA SSHD - Core + SFTP
+    implementation "org.apache.sshd:sshd-core:${sshdVersion}"
+    implementation "org.apache.sshd:sshd-sftp:${sshdVersion}"
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.2'
+
+    // Logging
+    implementation 'ch.qos.logback:logback-classic:1.4.14'
+
+    // Tests
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'com.jcraft:jsch:0.1.55'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+    }
+}
+
+// CrÃƒÂ©e un fat-jar exÃƒÂ©cutable
+jar {
+    manifest {
+        attributes 'Main-Class': application.mainClass
+    }
+    from {
+        configurations.runtimeClasspath.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}

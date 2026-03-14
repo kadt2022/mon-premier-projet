@@ -1,0 +1,1383 @@
+// ======= Takibu IAM - Domain Model Bundle =======
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\exception\EmailAlreadyExistsException.java =====
+
+package com.takibu.identitycore.domain.exception;
+
+public class EmailAlreadyExistsException extends RuntimeException {
+    public EmailAlreadyExistsException(String message) { super(message); }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\exception\InvalidStatusTransitionException.java =====
+
+package com.takibu.identitycore.domain.exception;
+
+/** Exception mÃ©tier pour une transition de statut interdite. */
+public class InvalidStatusTransitionException extends RuntimeException {
+    public InvalidStatusTransitionException(String message) {
+        super(message);
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\exception\MultipleUsersMatchedException.java =====
+
+package com.takibu.identitycore.domain.exception;
+
+public class MultipleUsersMatchedException extends RuntimeException {
+    public MultipleUsersMatchedException(String message) { super(message); }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\exception\PasswordPolicyViolationException.java =====
+
+package com.takibu.identitycore.domain.exception;
+
+public class PasswordPolicyViolationException extends RuntimeException {
+    public PasswordPolicyViolationException(String message) { super(message); }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\exception\SpaceDisabledException.java =====
+
+package com.takibu.identitycore.domain.exception;
+
+public class SpaceDisabledException extends RuntimeException {
+    public SpaceDisabledException(String message) { super(message); }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\exception\SpaceNotFoundException.java =====
+
+package com.takibu.identitycore.domain.exception;
+
+public class SpaceNotFoundException extends RuntimeException {
+    public SpaceNotFoundException(String message) { super(message); }
+    public SpaceNotFoundException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\exception\UserAlreadyExistsException.java =====
+
+package com.takibu.identitycore.domain.exception;
+
+public class UserAlreadyExistsException extends RuntimeException {
+    public UserAlreadyExistsException(String message) { super(message); }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\exception\UserCreationException.java =====
+
+package com.takibu.identitycore.domain.exception;
+
+public class UserCreationException extends RuntimeException {
+    public UserCreationException(String message) {
+        super(message);
+    }
+
+    public UserCreationException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\exception\UserNotFoundException.java =====
+
+package com.takibu.identitycore.domain.exception;
+
+
+public class UserNotFoundException extends RuntimeException {
+    public UserNotFoundException(String message) {
+        super(message);
+    }
+
+    public UserNotFoundException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\Account.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+
+import java.time.Instant;
+import java.util.Map;
+
+@Getter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Builder(toBuilder = true)
+public class Account {
+    @EqualsAndHashCode.Include
+    private final AccountId id;
+
+    private final EmailAddress email;
+    private final String displayName;
+    private final String avatarUrl;
+    private final Map<String, Object> metadata;
+
+    private final Instant createdAt;
+    private final Instant updatedAt;
+    @Builder.Default
+    private final Long version = 0L;
+
+    public static Account create(EmailAddress email, String displayName, String avatarUrl, Map<String, Object> metadata) {
+        Instant now = Instant.now();
+        return Account.builder()
+                .id(AccountId.newId())
+                .email(email)
+                .displayName(displayName)
+                .avatarUrl(avatarUrl)
+                .metadata(metadata)
+                .createdAt(now)
+                .updatedAt(now)
+                .version(0L)
+                .build();
+    }
+
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\AccountCredentials.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+
+import java.time.Instant;
+
+@Getter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Builder(toBuilder = true)
+public class AccountCredentials {
+
+    /** MÃªme identifiant que l'Account (relation 1â€“1) */
+    @EqualsAndHashCode.Include
+    private final AccountId accountId;
+
+    private final PasswordHash passwordHash;
+    private final Instant passwordUpdatedAt;
+    private final boolean mustChangeNextLogin;
+
+    private final int failedAttempts;
+    private final Instant lockedUntil;
+
+    private final Instant createdAt;
+    private final Instant updatedAt;
+    @Builder.Default
+    private final Long version = 0L;
+
+    // --------- RÃ¨gles simples
+    public AccountCredentials withNewPassword(PasswordHash newHash, boolean forceChange) {
+        Instant now = Instant.now();
+        return this.toBuilder()
+                .passwordHash(newHash)
+                .passwordUpdatedAt(now)
+                .mustChangeNextLogin(forceChange)
+                .failedAttempts(0)
+                .lockedUntil(null)
+                .updatedAt(now)
+                .build();
+    }
+
+    public AccountCredentials registerFailure(int maxAttempts, long lockSeconds) {
+        int next = this.failedAttempts + 1;
+        Instant lock = (next >= maxAttempts && lockSeconds > 0) ? Instant.now().plusSeconds(lockSeconds) : this.lockedUntil;
+        return this.toBuilder()
+                .failedAttempts(next)
+                .lockedUntil(lock)
+                .updatedAt(Instant.now())
+                .build();
+    }
+
+    public boolean isLocked() {
+        return lockedUntil != null && lockedUntil.isAfter(Instant.now());
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\AccountId.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+
+import java.util.Objects;
+import java.util.UUID;
+
+@Getter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public final class AccountId {
+    @EqualsAndHashCode.Include
+    private final UUID value;
+
+    public AccountId(UUID value) {
+        this.value = Objects.requireNonNull(value, "AccountId.value");
+    }
+
+    public static AccountId of(UUID value) { return new AccountId(value); }
+    public static AccountId newId() { return new AccountId(UUID.randomUUID()); }
+
+    @Override public String toString() { return value.toString(); }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\AccountIdentity.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+
+import java.time.Instant;
+import java.util.Map;
+
+@Getter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Builder(toBuilder = true)
+public class AccountIdentity {
+
+    @EqualsAndHashCode.Include
+    private final AccountIdentityId id;
+
+    private final AccountId accountId;
+
+    // UnicitÃ© (provider, issuer, subject)
+    private final String provider;
+    private final String issuer;
+    private final String subject;
+
+    private final String name;
+    private final String email;
+    private final String avatarUrl;
+
+    private final Map<String, Object> rawClaims;
+
+    private final Instant createdAt;
+    private final Instant updatedAt;
+    @Builder.Default
+    private final Long version = 0L;
+
+    public static AccountIdentity create(AccountId accountId, String provider, String issuer, String subject,
+                                         String name, String email, String avatarUrl, Map<String, Object> rawClaims) {
+        Instant now = Instant.now();
+        return AccountIdentity.builder()
+                .id(AccountIdentityId.newId())
+                .accountId(accountId)
+                .provider(provider)
+                .issuer(issuer)
+                .subject(subject)
+                .name(name)
+                .email(email)
+                .avatarUrl(avatarUrl)
+                .rawClaims(rawClaims)
+                .createdAt(now)
+                .updatedAt(now)
+                .version(0L)
+                .build();
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\AccountIdentityId.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+
+import java.util.Objects;
+import java.util.UUID;
+
+@Getter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public final class AccountIdentityId {
+    @EqualsAndHashCode.Include
+    private final UUID value;
+
+    private AccountIdentityId(UUID value) {
+        this.value = Objects.requireNonNull(value, "AccountIdentityId.value");
+    }
+
+    public static AccountIdentityId of(UUID value) { return new AccountIdentityId(value); }
+    public static AccountIdentityId newId() { return new AccountIdentityId(UUID.randomUUID()); }
+
+    @Override public String toString() { return value.toString(); }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\AssignmentMeta.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import java.time.Instant;
+import java.util.UUID;
+
+/** MÃ©tadonnÃ©es dâ€™attribution (timestamp + auteur). assignedBy peut Ãªtre null. */
+public record AssignmentMeta(Instant assignedAt, UUID assignedBy) { }
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\EmailAddress.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import java.util.Objects;
+import java.util.regex.Pattern;
+
+/**
+ * Value object representing an email address.
+ * Uses a more permissive pattern to support longer TLDs (up to 63 characters).
+ */
+public record EmailAddress(String value) {
+    private static final Pattern EMAIL_PATTERN = Pattern.compile(
+            "^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,63}$"
+    );
+
+    public EmailAddress {
+        Objects.requireNonNull(value, "Email address cannot be null");
+        if (!EMAIL_PATTERN.matcher(value).matches()) {
+            throw new IllegalArgumentException("Invalid email address format: " + value);
+        }
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\Group.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import lombok.*;
+
+import java.time.Instant;
+import java.util.Objects;
+
+@Getter
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@AllArgsConstructor
+public class Group {
+    @EqualsAndHashCode.Include @ToString.Include
+    private final GroupId id;
+    private final SpaceId spaceId;
+
+    @ToString.Include
+    private String name;
+    private String code;
+    private String description;
+    private Instant createdAt;
+    private Instant updatedAt;
+    private long version;
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\GroupId.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import java.util.UUID;
+
+public record GroupId(UUID value) { }
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\GroupMember.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+
+import java.time.Instant;
+import java.util.Objects;
+import java.util.UUID;
+
+@Getter
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class GroupMember {
+    @EqualsAndHashCode.Include @ToString.Include
+    private final UUID id;
+
+    private final SpaceId spaceId;
+    private final GroupId groupId;
+    private final UserId userId;
+    private Instant joinedAt;    // = infra.group_members.joined_at
+    private long version;
+
+    public GroupMember(UUID id, SpaceId spaceId, GroupId groupId, UserId userId,
+                       Instant joinedAt, long version) {
+        this.id = Objects.requireNonNull(id, "id");
+        this.spaceId = Objects.requireNonNull(spaceId, "spaceId");
+        this.groupId = Objects.requireNonNull(groupId, "groupId");
+        this.userId = Objects.requireNonNull(userId, "userId");
+        this.joinedAt = joinedAt;
+        this.version = version;
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\GroupRole.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+
+import java.util.Objects;
+import java.util.UUID;
+
+@Getter
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class GroupRole {
+    @EqualsAndHashCode.Include @ToString.Include
+    private final UUID id;
+
+    private final SpaceId spaceId;
+    private final GroupId groupId;
+    private final RoleId roleId;
+    private final AssignmentMeta meta; // assignedAt + assignedBy
+    private long version;
+
+    public GroupRole(UUID id, SpaceId spaceId, GroupId groupId, RoleId roleId,
+                     AssignmentMeta meta, long version) {
+        this.id = Objects.requireNonNull(id, "id");
+        this.spaceId = Objects.requireNonNull(spaceId, "spaceId");
+        this.groupId = Objects.requireNonNull(groupId, "groupId");
+        this.roleId = Objects.requireNonNull(roleId, "roleId");
+        this.meta = Objects.requireNonNull(meta, "meta");
+        this.version = version;
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\MfaFactorId.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import java.util.UUID;
+
+public record MfaFactorId(UUID value) { }
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\MfaFactorType.java =====
+
+package com.takibu.identitycore.domain.model;
+
+/** AlignÃ© sur lâ€™infra: TOTP, WEBAUTHN, SMS, EMAIL, PUSH */
+public enum MfaFactorType { TOTP, WEBAUTHN, SMS, EMAIL, PUSH }
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\MfaPolicy.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+
+import java.time.Instant;
+import java.util.Objects;
+
+@Getter
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class MfaPolicy {
+    @EqualsAndHashCode.Include @ToString.Include
+    private final MfaPolicyId id;
+
+    private final SpaceId spaceId;
+
+    private boolean enabled;   // toggle global
+    private boolean required;  // enforcement globale
+
+    // Autorisations par type
+    private boolean allowTotp;
+    private boolean allowWebauthn;
+    private boolean allowSms;
+    private boolean allowEmail;
+    private boolean allowPush;
+
+    private String stepUpRules;   // JSON/YAML free-form
+    private Instant createdAt;
+    private Instant updatedAt;
+    private long version;
+
+    public MfaPolicy(MfaPolicyId id, SpaceId spaceId, boolean enabled, boolean required,
+                     boolean allowTotp, boolean allowWebauthn, boolean allowSms, boolean allowEmail, boolean allowPush,
+                     String stepUpRules, Instant createdAt, Instant updatedAt, long version) {
+        this.id = Objects.requireNonNull(id, "id");
+        this.spaceId = Objects.requireNonNull(spaceId, "spaceId");
+        this.enabled = enabled;
+        this.required = required;
+        this.allowTotp = allowTotp;
+        this.allowWebauthn = allowWebauthn;
+        this.allowSms = allowSms;
+        this.allowEmail = allowEmail;
+        this.allowPush = allowPush;
+        this.stepUpRules = stepUpRules;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.version = version;
+    }
+
+    public void enforce() { this.required = true; this.enabled = true; }
+    public void relax()   { this.required = false; }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\MfaPolicyId.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import java.util.UUID;
+
+public record MfaPolicyId(UUID value) { }
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\Password.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.Objects;
+
+
+public record Password(String hash) {
+    public Password {
+        Objects.requireNonNull(hash, "Password hash cannot be null");
+        if (!hash.startsWith("$2a$")) { // Exemple pour BCrypt
+            // throw new IllegalArgumentException("Invalid password hash format");
+        }
+    }
+
+    // MÃ©thode pour vÃ©rifier si le mot de passe correspond au hash (implÃ©mentation via PasswordEncoder)
+    public boolean matches(String rawPassword, PasswordEncoder passwordEncoder) {
+        return passwordEncoder.matches(rawPassword, this.hash);
+    }
+
+    /**
+     * MÃ©thode factory pour crÃ©er un objet Password Ã  partir d'une valeur de hash existante.
+     * Utile pour la reconstruction depuis la persistance.
+     * @param hashedValue La chaÃƒÂ®ne de hash du mot de passe.
+     * @return Une nouvelle instance de Password.
+     */
+    public static Password fromHashedValue(String hashedValue) {
+        return new Password(hashedValue);
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\PasswordHash.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+
+import java.util.Objects;
+
+@Getter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public final class PasswordHash {
+    @EqualsAndHashCode.Include
+    private final String hash;     // ex: BCrypt string
+    private final String algo;     // ex: "bcrypt"
+    private final Integer version; // ex: policy version
+
+    private PasswordHash(String hash, String algo, Integer version) {
+        this.hash = Objects.requireNonNull(hash, "hash");
+        this.algo = (algo == null || algo.isBlank()) ? "bcrypt" : algo;
+        this.version = version;
+    }
+
+    public static PasswordHash of(String hash, String algo, Integer version) {
+        return new PasswordHash(hash, algo, version);
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\PasswordHasher.java =====
+
+package com.takibu.identitycore.domain.model;
+
+
+/** Port de hashage de mot de passe (implÃ©mentÃ© en infra, ex: Spring Security). */
+public interface PasswordHasher {
+    String hash(String raw);
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\Permission.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+
+import java.time.Instant;
+import java.util.Objects;
+
+@Getter
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class Permission {
+    @EqualsAndHashCode.Include @ToString.Include
+    private final PermissionId id;
+    private final SpaceId spaceId;
+
+    @ToString.Include
+    private String code;
+    private String description;
+    private Instant createdAt;
+    private Instant updatedAt;
+    private long version;
+
+    public Permission(PermissionId id, SpaceId spaceId, String code, String description,
+                      Instant createdAt, Instant updatedAt, long version) {
+        this.id = Objects.requireNonNull(id, "id");
+        this.spaceId = Objects.requireNonNull(spaceId, "spaceId");
+        this.code = Objects.requireNonNull(code, "code");
+        this.description = description;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.version = version;
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\PermissionEffect.java =====
+
+package com.takibu.identitycore.domain.model;
+
+/** ALLOW/DENY (override fin) */
+public enum PermissionEffect { ALLOW, DENY }
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\PermissionId.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import java.util.UUID;
+
+public record PermissionId(UUID value) { }
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\RecoveryCodeId.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import java.util.UUID;
+
+public record RecoveryCodeId(UUID value) { }
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\Role.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+
+import java.time.Instant;
+import java.util.Objects;
+
+@Getter
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@AllArgsConstructor
+public class Role {
+    @EqualsAndHashCode.Include @ToString.Include
+    private final RoleId id;
+    private final SpaceId spaceId;
+
+    @ToString.Include
+    private String name;
+    private String code;
+    private String description;
+    private Instant createdAt;
+    private Instant updatedAt;
+    private long version;
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\RoleId.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import java.util.UUID;
+
+public record RoleId(UUID value) { }
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\RolePermissionGrant.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+
+import java.time.Instant;
+import java.util.Objects;
+import java.util.UUID;
+
+@Getter
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class RolePermissionGrant {
+    @EqualsAndHashCode.Include @ToString.Include
+    private final UUID id;
+
+    private final SpaceId spaceId;
+    private final RoleId roleId;
+    private final PermissionId permissionId;
+    private PermissionEffect effect;
+    private Instant createdAtRolePerm;
+    private long version;
+
+    public RolePermissionGrant(UUID id, SpaceId spaceId, RoleId roleId, PermissionId permissionId,
+                               PermissionEffect effect, Instant createdAtRolePerm, long version) {
+        this.id = Objects.requireNonNull(id, "id");
+        this.spaceId = Objects.requireNonNull(spaceId, "spaceId");
+        this.roleId = Objects.requireNonNull(roleId, "roleId");
+        this.permissionId = Objects.requireNonNull(permissionId, "permissionId");
+        this.effect = Objects.requireNonNull(effect, "effect");
+        this.createdAtRolePerm = createdAtRolePerm;
+        this.version = version;
+    }
+
+    public void setEffect(PermissionEffect effect) { this.effect = Objects.requireNonNull(effect); }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\SpaceId.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import java.util.UUID;
+
+public record SpaceId(UUID value) { }
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\User.java =====
+
+//package com.takibu.identitycore.domain.model;
+//
+//import lombok.EqualsAndHashCode;
+//import lombok.Getter;
+//import lombok.Builder;
+//import lombok.ToString;
+//
+//import java.time.Instant;
+//import java.util.Map;
+//import java.util.Objects;
+//
+//
+//
+//@Getter
+//@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+//@Builder(toBuilder = true)
+//public class User {
+//
+//    @EqualsAndHashCode.Include
+//    private final UserId id;
+//    private final SpaceId spaceId;
+//    @ToString.Include
+//    private String username;
+//    private EmailAddress email;
+//    private Password password;
+//    private String firstName;
+//    private String lastName;
+//    @Builder.Default
+//    private UserStatus status = UserStatus.PENDING_ACTIVATION;
+//    @Builder.Default
+//    private boolean passwordExpired = false;
+//    @Builder.Default
+//    private boolean mfaEnabled = false;
+//    private Instant lastLoginAt;
+//    private Instant createdAt;
+//    private Instant updatedAt;
+//    private Map<String, Object> metadata;
+//    @Builder.Default
+//    private Long version = 0L;
+//
+//    /**
+//     * CrÃ©e un nouvel utilisateur.
+//     * C'est une mÃ©thode factory qui garantit un Ã©tat initial valide pour un nouvel utilisateur.
+//     * Elle est utilisÃ©e par le domaine pour crÃ©er de nouvelles instances d'entitÃ©s.
+//     * <p>
+//     * Note: Les annotations de suppression de warnings sont justifiÃ©es.
+//     * Le nombre de paramÃ¨tres est Ã©levÃ© pour une clartÃ© de la mÃ©thode factory,
+//     * et le warning 'unused' est ignorÃ© car la mÃ©thode est appelÃ©e depuis l'infrastructure.
+//     */
+//    @SuppressWarnings({ "java:S107", "unused" })
+//    public static User createNewUser(SpaceId spaceId,
+//                                     String username,
+//                                     String emailValue,
+//                                     String rawPassword,
+//                                     String firstName,
+//                                     String lastName,
+//                                     PasswordHasher passwordHasherhasher,
+//                                     Instant now,
+//                                     Map<String, Object> metadata) {
+//        Objects.requireNonNull(spaceId, "spaceId");
+//        Objects.requireNonNull(username, "username");
+//        Objects.requireNonNull(emailValue, "emailValue");
+//        Objects.requireNonNull(rawPassword, "rawPassword");
+//        Objects.requireNonNull(passwordHasherhasher, "hasher");
+//        Objects.requireNonNull(now, "now");
+//
+//        return User.builder()
+//                .id(UserId.generate())
+//                .spaceId(spaceId)
+//                .username(username)
+//                .email(new EmailAddress(emailValue))
+//                .password(new Password(passwordHasherhasher.hash(rawPassword)))
+//                .firstName(firstName)
+//                .lastName(lastName)
+//                .status(UserStatus.PENDING_ACTIVATION)
+//                .passwordExpired(true)
+//                .mfaEnabled(false)
+//                .createdAt(now)
+//                .updatedAt(now)
+//                .version(0L)
+//                .metadata(metadata)
+//                .build();
+//    }
+//}
+
+
+package com.takibu.identitycore.domain.model;
+
+
+import lombok.*;
+import java.time.Instant;
+import java.util.Map;
+import java.util.Objects;
+
+
+@Getter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Builder(toBuilder = true)
+public class User {
+
+
+    @EqualsAndHashCode.Include
+    private final UserId id;
+    private final SpaceId spaceId;
+    private final AccountId accountId; // NEW â€” link to global identity
+
+
+    private String username; // unique per space
+    private String firstName;
+    private String lastName;
+
+
+    @Builder.Default
+    private UserStatus status = UserStatus.PENDING_ACTIVATION;
+    @Builder.Default
+    private boolean passwordExpired = false; // local override
+    @Builder.Default
+    private boolean mfaEnabled = false; // local override
+
+
+    private Instant lastLoginAt;
+    private Instant createdAt;
+    private Instant updatedAt;
+    private Map<String, Object> metadata;
+    @Builder.Default
+    private Long version = 0L;
+
+
+    @SuppressWarnings("java:S107")
+    public static User create(UserId id,
+                              SpaceId spaceId,
+                              AccountId accountId,
+                              String username,
+                              String firstName,
+                              String lastName,
+                              UserStatus status,
+                              boolean mfaEnabled,
+                              boolean passwordExpired,
+                              Instant lastLoginAt,
+                              Instant createdAt,
+                              Instant updatedAt,
+                              Map<String, Object> metadata) {
+        Objects.requireNonNull(id, "id");
+        Objects.requireNonNull(spaceId, "spaceId");
+        Objects.requireNonNull(accountId, "accountId");
+        Objects.requireNonNull(username, "username");
+        Objects.requireNonNull(createdAt, "createdAt");
+        Objects.requireNonNull(updatedAt, "updatedAt");
+        return User.builder()
+                .id(id)
+                .spaceId(spaceId)
+                .accountId(accountId)
+                .username(username)
+                .firstName(firstName)
+                .lastName(lastName)
+                .status(status == null ? UserStatus.PENDING_ACTIVATION : status)
+                .mfaEnabled(mfaEnabled)
+                .passwordExpired(passwordExpired)
+                .lastLoginAt(lastLoginAt)
+                .createdAt(createdAt)
+                .updatedAt(updatedAt)
+                .metadata(metadata)
+                .version(0L)
+                .build();
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\UserId.java =====
+
+package com.takibu.identitycore.domain.model;
+
+
+import java.util.Objects;
+import java.util.UUID;
+
+public record UserId(UUID value) {
+    public UserId {
+        Objects.requireNonNull(value, "User ID cannot be null");
+    }
+
+    public static UserId generate() {
+        return new UserId(UUID.randomUUID());
+    }
+
+    public static UserId fromString(String id) {
+        return new UserId(UUID.fromString(id));
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\UserIdentity.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+
+import java.time.Instant;
+import java.util.Objects;
+import java.util.UUID;
+
+/** Lien utilisateur â†” fournisseur d'identitÃ© (ex: google/azuread/okta + subject) */
+@Getter
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class UserIdentity {
+    @EqualsAndHashCode.Include @ToString.Include
+    private final UUID id;
+
+    private final SpaceId spaceId;
+    private final UserId userId;
+
+    @ToString.Include
+    private String provider; // ex: "google"
+    private String subject;  // identifiant externe stable
+    private Instant createdAt;
+    private Instant updatedAt;
+    private long version;
+
+    public UserIdentity(UUID id, SpaceId spaceId, UserId userId,
+                        String provider, String subject, Instant createdAt, Instant updatedAt, long version) {
+        this.id = Objects.requireNonNull(id, "id");
+        this.spaceId = Objects.requireNonNull(spaceId, "spaceId");
+        this.userId = Objects.requireNonNull(userId, "userId");
+        this.provider = Objects.requireNonNull(provider, "provider");
+        this.subject = Objects.requireNonNull(subject, "subject");
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.version = version;
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\UserMfaFactor.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+
+import java.time.Instant;
+import java.util.Objects;
+
+@Getter
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class UserMfaFactor {
+    @EqualsAndHashCode.Include @ToString.Include
+    private final MfaFactorId id;
+
+    private final SpaceId spaceId;
+    private final UserId userId;
+    private final MfaFactorType factorType;  // TOTP/WEBAUTHN/SMS/EMAIL/PUSH
+    private final String label;
+
+    // Champs spÃ©cifiques par type (laisser null si non applicable)
+    private final String secretEnc;           // TOTP (chiffrÃ©)
+    private final String webauthnPublicKey;   // WEBAUTHN
+    private final String webauthnCredentialId;// WEBAUTHN
+    private final String phoneNumber;         // SMS
+    private final String emailAddress;        // EMAIL
+
+    private boolean verified;
+    private boolean primary;
+    private Instant lastUsedAt;
+    private Instant createdAt;
+    private Instant updatedAt;
+    private long version;
+
+    public UserMfaFactor(MfaFactorId id, SpaceId spaceId, UserId userId, MfaFactorType factorType,
+                         String label, String secretEnc, String webauthnPublicKey, String webauthnCredentialId,
+                         String phoneNumber, String emailAddress, boolean verified, boolean primary,
+                         Instant lastUsedAt, Instant createdAt, Instant updatedAt, long version) {
+        this.id = Objects.requireNonNull(id, "id");
+        this.spaceId = Objects.requireNonNull(spaceId, "spaceId");
+        this.userId = Objects.requireNonNull(userId, "userId");
+        this.factorType = Objects.requireNonNull(factorType, "factorType");
+        this.label = label;
+        this.secretEnc = secretEnc;
+        this.webauthnPublicKey = webauthnPublicKey;
+        this.webauthnCredentialId = webauthnCredentialId;
+        this.phoneNumber = phoneNumber;
+        this.emailAddress = emailAddress;
+        this.verified = verified;
+        this.primary = primary;
+        this.lastUsedAt = lastUsedAt;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.version = version;
+    }
+
+    public void enablePrimary(){ this.primary = true; }
+    public void disablePrimary(){ this.primary = false; }
+    public void markVerified(){ this.verified = true; }
+    public void markUsed(Instant when){ this.lastUsedAt = Objects.requireNonNull(when); }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\UserMfaSettings.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+
+import java.time.Instant;
+import java.util.Objects;
+import java.util.UUID;
+
+@Getter
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class UserMfaSettings {
+    @EqualsAndHashCode.Include @ToString.Include
+    private final UUID id;
+
+    private final SpaceId spaceId;
+    private final UserId userId;
+    private boolean enabled;
+    private final MfaFactorType preferredFactor; // nullable
+    private int recoveryCodesCount;
+    private Instant createdAt;
+    private Instant updatedAt;
+    private long version;
+
+    public UserMfaSettings(UUID id, SpaceId spaceId, UserId userId,
+                           boolean enabled, MfaFactorType preferredFactor, int recoveryCodesCount,
+                           Instant createdAt, Instant updatedAt, long version) {
+        this.id = Objects.requireNonNull(id, "id");
+        this.spaceId = Objects.requireNonNull(spaceId, "spaceId");
+        this.userId = Objects.requireNonNull(userId, "userId");
+        this.enabled = enabled;
+        this.preferredFactor = preferredFactor;
+        this.recoveryCodesCount = recoveryCodesCount;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.version = version;
+    }
+
+    public void enable(){ this.enabled = true; }
+    public void disable(){ this.enabled = false; }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\UserPermissionGrant.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+
+import java.time.Instant;
+import java.util.Objects;
+import java.util.UUID;
+
+@Getter
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class UserPermissionGrant {
+    @EqualsAndHashCode.Include @ToString.Include
+    private final UUID id;
+
+    private final SpaceId spaceId;
+    private final UserId userId;
+    private final PermissionId permissionId;
+    private PermissionEffect effect;     // ALLOW/DENY
+    private Instant createdAtUserPerm;   // â‰ˆ infra.created_at_user_perm
+    private long version;
+
+    public UserPermissionGrant(UUID id, SpaceId spaceId, UserId userId, PermissionId permissionId,
+                               PermissionEffect effect, Instant createdAtUserPerm, long version) {
+        this.id = Objects.requireNonNull(id, "id");
+        this.spaceId = Objects.requireNonNull(spaceId, "spaceId");
+        this.userId = Objects.requireNonNull(userId, "userId");
+        this.permissionId = Objects.requireNonNull(permissionId, "permissionId");
+        this.effect = Objects.requireNonNull(effect, "effect");
+        this.createdAtUserPerm = createdAtUserPerm;
+        this.version = version;
+    }
+
+    public void setEffect(PermissionEffect effect) { this.effect = Objects.requireNonNull(effect); }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\UserRecoveryCode.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+
+import java.time.Instant;
+import java.util.Objects;
+
+@Getter
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@SuppressWarnings({"FieldMayBeFinal", "unused"})
+public class UserRecoveryCode {
+    @EqualsAndHashCode.Include @ToString.Include
+    private final RecoveryCodeId id;
+
+    private final SpaceId spaceId;
+    private final UserId userId;
+    private final String codeHash;
+    private final Instant createdAt;
+
+    private boolean used;
+    private Instant usedAt;
+    private Instant updatedAt;
+    private long version;
+
+    public UserRecoveryCode(RecoveryCodeId id, SpaceId spaceId, UserId userId,
+                            String codeHash, boolean used, Instant usedAt,
+                            Instant createdAt, Instant updatedAt, long version) {
+        this.id = Objects.requireNonNull(id, "id");
+        this.spaceId = Objects.requireNonNull(spaceId, "spaceId");
+        this.userId = Objects.requireNonNull(userId, "userId");
+        this.codeHash = Objects.requireNonNull(codeHash, "codeHash");
+        this.used = used;
+        this.usedAt = usedAt;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.version = version;
+    }
+
+    /** Idempotent */
+    public void markUsed(Instant when){
+        Objects.requireNonNull(when, "when");
+        if (!this.used) { this.used = true; this.usedAt = when; }
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\UserRoleAssignment.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+
+import java.util.Objects;
+import java.util.UUID;
+
+@Getter
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class UserRoleAssignment {
+    @EqualsAndHashCode.Include @ToString.Include
+    private final UUID id;
+
+    private final SpaceId spaceId;
+    private final UserId userId;
+    private final RoleId roleId;
+    private final AssignmentMeta meta; // assignedAt + assignedBy
+    private long version;
+
+    public UserRoleAssignment(UUID id, SpaceId spaceId, UserId userId, RoleId roleId,
+                              AssignmentMeta meta, long version) {
+        this.id = Objects.requireNonNull(id, "id");
+        this.spaceId = Objects.requireNonNull(spaceId, "spaceId");
+        this.userId = Objects.requireNonNull(userId, "userId");
+        this.roleId = Objects.requireNonNull(roleId, "roleId");
+        this.meta = Objects.requireNonNull(meta, "meta");
+        this.version = version;
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\model\UserStatus.java =====
+
+package com.takibu.identitycore.domain.model;
+
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.Map;
+
+public enum UserStatus {
+    PENDING_ACTIVATION,
+    ACTIVE,
+    SUSPENDED,
+    LOCKED,
+    PASSWORD_RESET,
+    DEACTIVATED;
+
+    private static final Map<UserStatus, EnumSet<UserStatus>> ALLOWED = new EnumMap<>(UserStatus.class);
+    static {
+        // Depuis PENDING_ACTIVATION : activer ou dÃ©sactiver
+        ALLOWED.put(PENDING_ACTIVATION, EnumSet.of(ACTIVE, DEACTIVATED));
+
+        // Depuis ACTIVE : suspendre, verrouiller, forcer reset pwd, dÃ©sactiver
+        ALLOWED.put(ACTIVE, EnumSet.of(SUSPENDED, LOCKED, PASSWORD_RESET, DEACTIVATED));
+
+        // Depuis SUSPENDED : rÃ©activer ou dÃ©sactiver
+        ALLOWED.put(SUSPENDED, EnumSet.of(ACTIVE, DEACTIVATED));
+
+        // Depuis LOCKED : rÃ©activer ou dÃ©sactiver
+        ALLOWED.put(LOCKED, EnumSet.of(ACTIVE, DEACTIVATED));
+
+        // Depuis PASSWORD_RESET : rÃ©activer (aprÃ¨s changement) ou dÃ©sactiver
+        ALLOWED.put(PASSWORD_RESET, EnumSet.of(ACTIVE, DEACTIVATED));
+
+        // Depuis DEACTIVATED : aucune transition
+        ALLOWED.put(DEACTIVATED, EnumSet.noneOf(UserStatus.class));
+    }
+
+    /** RÃ¨gle mÃ©tier : est-ce que 'this' peut aller vers 'target' ? */
+    public boolean canTransitionTo(UserStatus target) {
+        return ALLOWED.getOrDefault(this, EnumSet.noneOf(UserStatus.class)).contains(target);
+    }
+
+    /** Statuts qui exigent la rÃ©vocation d'accÃ¨s (sessions/tokens). */
+    public boolean requiresRevocation() {
+        return switch (this) {
+            case DEACTIVATED, LOCKED, SUSPENDED, PASSWORD_RESET -> true;
+            case ACTIVE, PENDING_ACTIVATION -> false;
+        };
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\passwordpolicy\PasswordPolicy.java =====
+
+package com.takibu.identitycore.domain.passwordpolicy;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.Instant;
+import java.util.Objects;
+import java.util.UUID;
+
+@Getter
+@Setter
+@NoArgsConstructor// Ensure this is protected if no-arg constructor is internal
+public class PasswordPolicy {
+
+   // @Setter(AccessLevel.NONE)
+    private UUID id; // Uses value object
+    private String name;
+    private int minLength;
+    private boolean requireUppercase;
+    private boolean requireLowercase;
+    private boolean requireDigit;
+    private boolean requireSpecialChar;
+    private int maxAgeDays;
+    private int historySize;
+    private boolean defaultPolicy;
+    private Instant createdAt;
+    private Instant updatedAt;
+    private Long version;
+
+    PasswordPolicy(UUID id, String name, int minLength, boolean requireUppercase,
+                   boolean requireLowercase, boolean requireDigit, boolean requireSpecialChar,
+                   int maxAgeDays, int historySize, boolean defaultPolicy) {
+        this.id = Objects.requireNonNull(id, "ID cannot be null");
+        this.name = Objects.requireNonNull(name, "Policy name cannot be null");
+        this.minLength = minLength;
+        this.requireUppercase = requireUppercase;
+        this.requireLowercase = requireLowercase;
+        this.requireDigit = requireDigit;
+        this.requireSpecialChar = requireSpecialChar;
+        this.maxAgeDays = maxAgeDays;
+        this.historySize = historySize;
+        this.defaultPolicy = defaultPolicy;
+        this.createdAt = Instant.now();
+        this.updatedAt = Instant.now();
+        this.version = 0L;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (id == null || o == null || getClass() != o.getClass()) return false;
+        PasswordPolicy that = (PasswordPolicy) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+    
+    /**
+     * Valide un mot de passe par rapport Ã  cette politique
+     * @param password Le mot de passe Ã  valider
+     * @return true si le mot de passe est valide, false sinon
+     */
+    public boolean isValid(String password) {
+        if (password == null || password.length() < minLength) {
+            return false;
+        }
+
+        if (requireUppercase && !password.matches(".*[A-Z].*")) {
+            return false;
+        }
+        
+        if (requireLowercase && !password.matches(".*[a-z].*")) {
+            return false;
+        }
+        
+        if (requireDigit && !password.matches(".*\\d.*")) {
+            return false;
+        }
+
+        return !requireSpecialChar || password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?].*");
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\passwordpolicy\PasswordPolicyConfig.java =====
+
+package com.takibu.identitycore.domain.passwordpolicy;
+
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.UUID;
+
+@Getter
+@Setter
+@Configuration
+@ConfigurationProperties(prefix = "security.password-policy")
+public class PasswordPolicyConfig {
+    private int minLength = 8;
+    private boolean requireUppercase = true;
+    private boolean requireLowercase = true;
+    private boolean requireDigit = true;
+    private boolean requireSpecialChar = true;
+    private int maxAgeDays = 90;
+    private int historySize = 5;
+
+    @Bean
+    public PasswordPolicy passwordPolicy() {
+        return new PasswordPolicy(UUID.randomUUID(), "Default Password Policy", minLength, requireUppercase, requireLowercase, requireDigit, requireSpecialChar, maxAgeDays, historySize, true);
+    }
+}

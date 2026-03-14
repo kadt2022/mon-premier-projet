@@ -1,0 +1,86 @@
+# ==============================
+# Takibu — Monolithe modulaire
+# ==============================
+
+### Gradle ###
+.gradle/
+**/.gradle/
+build/
+**/build/
+out/
+**/out/
+postman/
+
+# Keep Gradle wrapper ONLY at root
+**/gradle/wrapper/gradle-wrapper.jar
+**/gradle/wrapper/gradle-wrapper.properties
+**/gradlew
+**/gradlew.bat
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+!gradlew
+!gradlew.bat
+
+### IDEs ###
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.project
+.classpath
+.settings/
+.apt_generated
+.factorypath
+.springBeans
+.sts4-cache/
+nbproject/private/
+nbbuild/
+nbdist/
+dist/
+.nb-gradle/
+
+### Java / Général ###
+bin/
+**/bin/
+target/
+**/target/
+*.log
+**/logs/
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+hs_err_pid*
+replay_pid*
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### Spring / Config locale (secrets) ###
+.env
+.env.*
+application-local.yml
+application-local.yaml
+application-*.properties.local
+application-*.yml.local
+
+### Couverture / rapports ###
+coverage/
+**/coverage/
+jacoco.exec
+**/jacoco/
+reports/
+**/reports/
+
+### Node (si tu ajoutes un front) ###
+node_modules/
+**/node_modules/
+
+### Scratch / dumps ###
+**/tout_le_code.txt
+**/commande.txt
+**/data.sql
+**/view.sql

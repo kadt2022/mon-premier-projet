@@ -1,0 +1,90 @@
+// ======= Takibu IAM - Domain Repository & Ports Bundle =======
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\repository\AccountCredentialsRepository.java =====
+
+package com.takibu.identitycore.domain.repository;
+
+
+import com.takibu.identitycore.domain.model.AccountCredentials;
+
+
+public interface AccountCredentialsRepository {
+    AccountCredentials save(AccountCredentials credentials);
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\repository\AccountRepository.java =====
+
+package com.takibu.identitycore.domain.repository;
+
+
+import com.takibu.identitycore.domain.model.*;
+
+import java.util.Optional;
+
+
+public interface AccountRepository {
+    Optional<Account> findById(AccountId id);
+
+    Optional<Account> findByEmail(EmailAddress email);
+
+    Account save(Account account);
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\domain\repository\UserRepository.java =====
+
+package com.takibu.identitycore.domain.repository;
+
+import com.takibu.identitycore.domain.model.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import java.util.Optional;
+import java.util.UUID;
+
+public interface UserRepository {
+
+    // Commandes d'Ã©criture (Write)
+    User save(User user);
+    void delete(User user);
+    void deleteById(UserId id);
+
+    // RequÃªtes de lecture (Read)
+    Optional<User> findById(UserId id);
+
+    // UnicitÃ© par Space
+    Optional<User> findByUsername(SpaceId spaceId, String username);
+    Optional<User> findByEmail(SpaceId spaceId, EmailAddress email);
+
+    // RequÃªtes de vÃ©rification d'unicitÃ© pour les mises Ã  jour
+    boolean existsByUsernameIgnoreCaseAndIdNot(SpaceId spaceId, String username, UUID excludeId);
+    boolean existsByEmailIgnoreCaseAndIdNot(SpaceId spaceId, EmailAddress email, UUID excludeId);
+
+    // RequÃªte de pagination par Space
+    Page<User> findAllBySpace(SpaceId spaceId, Pageable pageable);
+
+    /** V2 â€” check if a profile already exists for an Account in a Space */
+    boolean existsBySpaceAndAccount(SpaceId spaceId, AccountId accountId);
+
+
+
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\port\SpaceManagementPort.java =====
+
+package com.takibu.identitycore.port;
+
+import com.takibu.identitycore.domain.model.SpaceId;
+
+/**
+ * Port de sortie pour la gestion des Spaces.
+ * DÃ©finit le contrat que l'infrastructure doit implÃ©menter
+ * pour que le domaine puisse interagir avec les Spaces (ici, via le TMS).
+ */
+public interface SpaceManagementPort {
+    /**
+     * VÃ©rifie si un Space existe.
+     * @param spaceId L'identifiant du Space.
+     * @return true si le Space existe, false sinon.
+     */
+    boolean doesSpaceExist(SpaceId spaceId);
+}

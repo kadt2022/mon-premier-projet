@@ -1,0 +1,167 @@
+// ======= Takibu IAM - Interfaces (REST) & Tests Bundle =======
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\interfaces\rest\controller\UserControllerV2.java =====
+
+// =============================================================
+// This patch introduces a new endpoint: POST /api/spaces/{spaceId}/users
+// supporting two modes:
+// - Attach existing Account: { accountId, username, ... }
+// - Create new Account + Credentials then User: { email, rawPassword, username, ... }
+//
+// It replaces the current header-based endpoint /api/users (X-Space-Id) and
+// removes email/password from the User aggregate in favor of Account(+Credentials).
+//
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// FILE 1 â€” interfaces/rest/controller/UserControllerV2.java
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+package com.takibu.identitycore.interfaces.rest.controller;
+
+import com.takibu.identitycore.application.command.CreateUserCommandV2;
+import com.takibu.identitycore.application.service.UserOnboardingApplicationService;
+import com.takibu.identitycore.interfaces.rest.request.CreateUserRequestV2;
+import com.takibu.identitycore.interfaces.rest.response.UserResponse;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+
+import java.util.UUID;
+
+
+@RestController
+@RequestMapping("/api/spaces/{spaceId}/users")
+@RequiredArgsConstructor
+@Validated
+public class UserControllerV2 {
+
+    private final UserOnboardingApplicationService service;
+
+    @PostMapping
+    public ResponseEntity<UserResponse> create(@PathVariable("spaceId") UUID spaceId,
+                                               @Valid @RequestBody CreateUserRequestV2 req) {
+        CreateUserCommandV2 cmd = CreateUserCommandV2.from(spaceId, req);
+        UserResponse created = service.createUserV2(cmd);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\interfaces\rest\request\CreateUserRequestV2.java =====
+
+package com.takibu.identitycore.interfaces.rest.request;
+
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Pattern;
+
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+
+/**
+ * Payload V2 â€” either provide accountId OR (email + rawPassword).
+ * Cross-field validation is enforced in the application service for simplicity.
+ */
+public record CreateUserRequestV2(
+        UUID accountId,
+        @Email String email,
+        @Size(min = 8, message = "Password must be at least 8 characters long") String rawPassword,
+
+        @NotBlank @Size(min = 3, max = 150) String username,
+        String firstName,
+        String lastName,
+
+        InitialAssignments initialAssignments,
+        Map<String, Object> metadata
+) {
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\interfaces\rest\request\InitialAssignments.java =====
+
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// FILE 3 â€” interfaces/rest/request/InitialAssignments.java
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+package com.takibu.identitycore.interfaces.rest.request;
+
+
+import java.util.List;
+
+
+public record InitialAssignments(
+        List<String> roleNames,
+        List<String> groupCodes
+) {
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\interfaces\rest\request\UserRequest.java =====
+
+package com.takibu.identitycore.interfaces.rest.request;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+import java.util.Map;
+
+
+/**
+ * @param rawPassword Validation de base. La politique est plus dÃ©taillÃ©e.
+ * @param firstName   Ces champs peuvent Ãªtre null/vides si non obligatoires
+ */
+public record UserRequest(
+        @NotBlank(message = "Username cannot be empty") @Size(min = 5, max = 50, message = "Username must be between 3 and 50 characters") String username,
+        @NotBlank(message = "Email cannot be empty") @Email(message = "Invalid email format") String email,
+
+        @NotBlank(message = "Password cannot be empty") @Size(min = 8, message = "Password must be at least 8 characters long") String rawPassword,
+        String firstName, String lastName,  Map<String, Object> metadata){
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\interfaces\rest\response\UserResponse.java =====
+
+package com.takibu.identitycore.interfaces.rest.response;
+
+import com.takibu.identitycore.domain.model.UserStatus;
+
+import java.time.Instant;
+import java.util.UUID;
+
+/**
+ *  utilisÃ© pour renvoyer les dÃ©tails d'un utilisateur depuis la couche application.
+ * Il reprÃ©sente une vue simplifiÃ©e de l'agrÃ©gat User.
+ */
+public record UserResponse(
+        UUID id,
+        UUID spaceId,
+        String username,
+        String email,
+        String firstName,
+        String lastName,
+        UserStatus status,
+        boolean mfaEnabled,
+        boolean passwordExpired,
+        Instant lastLoginAt,
+        Instant createdAt,
+        Instant updatedAt,
+        Long version
+) {}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\test\java\com\takibu\identitycore\IdentityCoreApplicationTests.java =====
+
+package com.takibu.identitycore;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class IdentityCoreApplicationTests {
+
+	@Test
+	void contextLoads() {
+	}
+
+}

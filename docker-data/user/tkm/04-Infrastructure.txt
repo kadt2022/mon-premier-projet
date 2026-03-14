@@ -1,0 +1,1852 @@
+// ======= Takibu IAM - Infrastructure Bundle =======
+
+﻿
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\build\generated\sources\annotationProcessor\java\main\com\takibu\identitycore\infrastructure\jpa\mapper\AccountCredentialsJpaMapperImpl.java =====
+
+package com.takibu.identitycore.infrastructure.jpa.mapper;
+
+import com.takibu.identitycore.domain.model.AccountCredentials;
+import com.takibu.identitycore.domain.model.AccountId;
+import com.takibu.identitycore.infrastructure.entity.AccountCredentialsEntity;
+import java.util.UUID;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = "org.mapstruct.ap.MappingProcessor",
+    date = "2025-08-31T09:20:18-0400",
+    comments = "version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-8.14.3.jar, environment: Java 21.0.2 (Oracle Corporation)"
+)
+@Component
+public class AccountCredentialsJpaMapperImpl implements AccountCredentialsJpaMapper {
+
+    @Override
+    public AccountCredentialsEntity toEntity(AccountCredentials source) {
+        if ( source == null ) {
+            return null;
+        }
+
+        AccountCredentialsEntity.AccountCredentialsEntityBuilder accountCredentialsEntity = AccountCredentialsEntity.builder();
+
+        accountCredentialsEntity.id( sourceAccountIdValue( source ) );
+        accountCredentialsEntity.mustChangeNextLogin( source.isMustChangeNextLogin() );
+        accountCredentialsEntity.failedAttempts( source.getFailedAttempts() );
+        accountCredentialsEntity.lockedUntil( source.getLockedUntil() );
+        accountCredentialsEntity.passwordUpdatedAt( source.getPasswordUpdatedAt() );
+
+        accountCredentialsEntity.passwordHash( source.getPasswordHash() == null ? null : source.getPasswordHash().getHash() );
+        accountCredentialsEntity.passwordAlgo( source.getPasswordHash() == null ? null : source.getPasswordHash().getAlgo() );
+        accountCredentialsEntity.passwordVersion( source.getPasswordHash() == null ? 1 : source.getPasswordHash().getVersion() );
+
+        return accountCredentialsEntity.build();
+    }
+
+    @Override
+    public AccountCredentials toDomain(AccountCredentialsEntity entity) {
+        if ( entity == null ) {
+            return null;
+        }
+
+        AccountCredentials.AccountCredentialsBuilder accountCredentials = AccountCredentials.builder();
+
+        accountCredentials.accountId( toAccountId( entity.getId() ) );
+        accountCredentials.mustChangeNextLogin( entity.isMustChangeNextLogin() );
+        if ( entity.getFailedAttempts() != null ) {
+            accountCredentials.failedAttempts( entity.getFailedAttempts() );
+        }
+        accountCredentials.lockedUntil( entity.getLockedUntil() );
+        accountCredentials.passwordUpdatedAt( entity.getPasswordUpdatedAt() );
+        accountCredentials.createdAt( entity.getCreatedAt() );
+        accountCredentials.updatedAt( entity.getUpdatedAt() );
+        accountCredentials.version( entity.getVersion() );
+
+        accountCredentials.passwordHash( com.takibu.identitycore.domain.model.PasswordHash.of(entity.getPasswordHash(),entity.getPasswordAlgo(),(entity.getPasswordVersion() == null ? 1 : entity.getPasswordVersion())) );
+
+        return accountCredentials.build();
+    }
+
+    private UUID sourceAccountIdValue(AccountCredentials accountCredentials) {
+        AccountId accountId = accountCredentials.getAccountId();
+        if ( accountId == null ) {
+            return null;
+        }
+        return accountId.getValue();
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\build\generated\sources\annotationProcessor\java\main\com\takibu\identitycore\infrastructure\jpa\mapper\AccountJpaMapperImpl.java =====
+
+package com.takibu.identitycore.infrastructure.jpa.mapper;
+
+import com.takibu.identitycore.domain.model.Account;
+import com.takibu.identitycore.domain.model.AccountId;
+import com.takibu.identitycore.domain.model.EmailAddress;
+import com.takibu.identitycore.infrastructure.entity.AccountEntity;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.UUID;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = "org.mapstruct.ap.MappingProcessor",
+    date = "2025-08-31T09:20:18-0400",
+    comments = "version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-8.14.3.jar, environment: Java 21.0.2 (Oracle Corporation)"
+)
+@Component
+public class AccountJpaMapperImpl implements AccountJpaMapper {
+
+    @Override
+    public AccountEntity toEntity(Account account) {
+        if ( account == null ) {
+            return null;
+        }
+
+        AccountEntity.AccountEntityBuilder accountEntity = AccountEntity.builder();
+
+        accountEntity.id( accountIdValue( account ) );
+        accountEntity.email( accountEmailValue( account ) );
+        accountEntity.displayName( account.getDisplayName() );
+        accountEntity.avatarUrl( account.getAvatarUrl() );
+        Map<String, Object> map = account.getMetadata();
+        if ( map != null ) {
+            accountEntity.metadata( new LinkedHashMap<String, Object>( map ) );
+        }
+
+        return accountEntity.build();
+    }
+
+    @Override
+    public Account toDomain(AccountEntity entity) {
+        if ( entity == null ) {
+            return null;
+        }
+
+        Account.AccountBuilder account = Account.builder();
+
+        account.id( toAccountId( entity.getId() ) );
+        account.email( toEmailAddress( entity.getEmail() ) );
+        account.displayName( entity.getDisplayName() );
+        account.avatarUrl( entity.getAvatarUrl() );
+        Map<String, Object> map = entity.getMetadata();
+        if ( map != null ) {
+            account.metadata( new LinkedHashMap<String, Object>( map ) );
+        }
+        account.createdAt( entity.getCreatedAt() );
+        account.updatedAt( entity.getUpdatedAt() );
+        account.version( entity.getVersion() );
+
+        return account.build();
+    }
+
+    private UUID accountIdValue(Account account) {
+        AccountId id = account.getId();
+        if ( id == null ) {
+            return null;
+        }
+        return id.getValue();
+    }
+
+    private String accountEmailValue(Account account) {
+        EmailAddress email = account.getEmail();
+        if ( email == null ) {
+            return null;
+        }
+        return email.value();
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\build\generated\sources\annotationProcessor\java\main\com\takibu\identitycore\infrastructure\jpa\mapper\UserJpaMapperImpl.java =====
+
+package com.takibu.identitycore.infrastructure.jpa.mapper;
+
+import com.takibu.identitycore.domain.model.AccountId;
+import com.takibu.identitycore.domain.model.SpaceId;
+import com.takibu.identitycore.domain.model.User;
+import com.takibu.identitycore.domain.model.UserId;
+import com.takibu.identitycore.infrastructure.entity.UserEntity;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.UUID;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = "org.mapstruct.ap.MappingProcessor",
+    date = "2025-08-31T09:20:18-0400",
+    comments = "version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-8.14.3.jar, environment: Java 21.0.2 (Oracle Corporation)"
+)
+@Component
+public class UserJpaMapperImpl implements UserJpaMapper {
+
+    @Override
+    public UserEntity toEntity(User user) {
+        if ( user == null ) {
+            return null;
+        }
+
+        UserEntity.UserEntityBuilder userEntity = UserEntity.builder();
+
+        userEntity.id( userIdValue( user ) );
+        userEntity.spaceId( userSpaceIdValue( user ) );
+        userEntity.accountId( userAccountIdValue( user ) );
+        userEntity.username( user.getUsername() );
+        userEntity.firstName( user.getFirstName() );
+        userEntity.lastName( user.getLastName() );
+        userEntity.status( user.getStatus() );
+        userEntity.mfaEnabled( user.isMfaEnabled() );
+        userEntity.passwordExpired( user.isPasswordExpired() );
+        userEntity.lastLoginAt( user.getLastLoginAt() );
+        Map<String, Object> map = user.getMetadata();
+        if ( map != null ) {
+            userEntity.metadata( new LinkedHashMap<String, Object>( map ) );
+        }
+
+        return userEntity.build();
+    }
+
+    @Override
+    public User toDomain(UserEntity entity) {
+        if ( entity == null ) {
+            return null;
+        }
+
+        User.UserBuilder user = User.builder();
+
+        user.id( userEntityToUserId( entity ) );
+        user.spaceId( userEntityToSpaceId( entity ) );
+        user.accountId( userEntityToAccountId( entity ) );
+        user.createdAt( entity.getCreatedAt() );
+        user.updatedAt( entity.getUpdatedAt() );
+        user.version( entity.getVersion() );
+        user.username( entity.getUsername() );
+        user.firstName( entity.getFirstName() );
+        user.lastName( entity.getLastName() );
+        user.status( entity.getStatus() );
+        user.mfaEnabled( entity.isMfaEnabled() );
+        user.passwordExpired( entity.isPasswordExpired() );
+        user.lastLoginAt( entity.getLastLoginAt() );
+        Map<String, Object> map = entity.getMetadata();
+        if ( map != null ) {
+            user.metadata( new LinkedHashMap<String, Object>( map ) );
+        }
+
+        return user.build();
+    }
+
+    private UUID userIdValue(User user) {
+        UserId id = user.getId();
+        if ( id == null ) {
+            return null;
+        }
+        return id.value();
+    }
+
+    private UUID userSpaceIdValue(User user) {
+        SpaceId spaceId = user.getSpaceId();
+        if ( spaceId == null ) {
+            return null;
+        }
+        return spaceId.value();
+    }
+
+    private UUID userAccountIdValue(User user) {
+        AccountId accountId = user.getAccountId();
+        if ( accountId == null ) {
+            return null;
+        }
+        return accountId.getValue();
+    }
+
+    protected UserId userEntityToUserId(UserEntity userEntity) {
+        if ( userEntity == null ) {
+            return null;
+        }
+
+        UUID value = null;
+
+        value = userEntity.getId();
+
+        UserId userId = new UserId( value );
+
+        return userId;
+    }
+
+    protected SpaceId userEntityToSpaceId(UserEntity userEntity) {
+        if ( userEntity == null ) {
+            return null;
+        }
+
+        UUID value = null;
+
+        value = userEntity.getSpaceId();
+
+        SpaceId spaceId = new SpaceId( value );
+
+        return spaceId;
+    }
+
+    protected AccountId userEntityToAccountId(UserEntity userEntity) {
+        if ( userEntity == null ) {
+            return null;
+        }
+
+        UUID value = null;
+
+        value = userEntity.getAccountId();
+
+        AccountId accountId = new AccountId( value );
+
+        return accountId;
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\adapter\AccountCredentialsRepositoryAdapter.java =====
+
+package com.takibu.identitycore.infrastructure.adapter;
+
+import com.takibu.identitycore.domain.model.AccountCredentials;
+import com.takibu.identitycore.domain.repository.AccountCredentialsRepository;
+import com.takibu.identitycore.infrastructure.entity.AccountCredentialsEntity;
+import com.takibu.identitycore.infrastructure.jpa.mapper.AccountCredentialsJpaMapper;
+import com.takibu.identitycore.infrastructure.jpa.repository.JpaAccountCredentialsRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+
+@Component
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
+public class AccountCredentialsRepositoryAdapter implements AccountCredentialsRepository {
+
+    private final JpaAccountCredentialsRepository jpa;
+    private final AccountCredentialsJpaMapper mapper;
+
+    @Override
+    @Transactional
+    public AccountCredentials save(AccountCredentials credentials) {
+        AccountCredentialsEntity saved = jpa.save(mapper.toEntity(credentials));
+        return mapper.toDomain(saved);
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\adapter\AccountRepositoryAdapter.java =====
+
+package com.takibu.identitycore.infrastructure.adapter;
+
+import com.takibu.identitycore.domain.model.*;
+import com.takibu.identitycore.domain.repository.AccountRepository;
+import com.takibu.identitycore.infrastructure.entity.AccountEntity;
+import com.takibu.identitycore.infrastructure.jpa.mapper.AccountJpaMapper;
+import com.takibu.identitycore.infrastructure.jpa.repository.JpaAccountRepository;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
+
+
+@Component
+@Transactional(readOnly = true)
+public class AccountRepositoryAdapter implements AccountRepository {
+
+
+    private final JpaAccountRepository jpa;
+    private final AccountJpaMapper mapper;
+
+
+    public AccountRepositoryAdapter(JpaAccountRepository jpa, AccountJpaMapper mapper) {
+        this.jpa = jpa;
+        this.mapper = mapper;
+    }
+
+
+    @Override
+    public Optional<Account> findById(AccountId id) {
+        return jpa.findById(id.getValue()).map(mapper::toDomain);
+    }
+
+
+    @Override
+    public Optional<Account> findByEmail(EmailAddress email) {
+        return jpa.findByEmailIgnoreCase(email.value()).map(mapper::toDomain);
+    }
+
+
+    @Override
+    @Transactional
+    public Account save(Account account) {
+        AccountEntity saved = jpa.save(mapper.toEntity(account));
+        return mapper.toDomain(saved);
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\adapter\SpaceManagementAdapter.java =====
+
+package com.takibu.identitycore.infrastructure.adapter;
+
+import com.takibu.identitycore.domain.model.SpaceId;
+import com.takibu.identitycore.port.SpaceManagementPort;
+import org.springframework.stereotype.Component;
+
+import java.util.UUID;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Arrays;
+
+/**
+ * Adaptateur pour le port de gestion des Spaces.
+ * Cette classe implÃ©mente le contrat "SpaceManagementPort".
+ * Dans une application rÃ©elle, cette classe ferait un appel API au Takibu Management Service (TMS).
+ * Ici, nous utilisons un mock pour simuler la rÃ©ponse du TMS.
+ */
+@Component
+public class SpaceManagementAdapter implements SpaceManagementPort {
+
+    // Liste mock de SpaceId existants, qui serait en rÃ©alitÃ© vÃ©rifiÃ©e via un appel au TMS.
+    private static final Set<UUID> EXISTING_SPACES = new HashSet<>(Arrays.asList(
+            UUID.fromString("11111111-2222-3333-4444-555555555555"),
+            UUID.fromString("d8a01f5c-89a3-4b6e-b69a-7a54a7f0e34c"),
+            UUID.fromString("e9f80a2b-1c3d-4e5f-8c7d-9a0b1c2d3e4f")
+    ));
+
+    @Override
+    public boolean doesSpaceExist(SpaceId spaceId) {
+        // Logique de simulation :
+        // Dans une vraie application, cette ligne ferait une requÃªte HTTP GET
+        // vers l'API du TMS, par exemple:
+        // return restTemplate.getForObject("http://tms-service/api/v1/spaces/{spaceId}", Boolean.class, spaceId.value());
+
+        // Pour notre cas, on vÃ©rifie simplement si l'ID est dans notre liste mock.
+        return EXISTING_SPACES.contains(spaceId.value());
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\adapter\UserRepositoryAdapter.java =====
+
+package com.takibu.identitycore.infrastructure.adapter;
+
+import com.takibu.identitycore.domain.model.*;
+import com.takibu.identitycore.domain.repository.UserRepository;
+import com.takibu.identitycore.infrastructure.entity.UserEntity;
+import com.takibu.identitycore.infrastructure.jpa.mapper.UserJpaMapper;
+import com.takibu.identitycore.infrastructure.jpa.repository.JpaUserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
+import java.util.UUID;
+
+@Component
+@Transactional(readOnly = true)
+public class UserRepositoryAdapter implements UserRepository {
+
+    private final JpaUserRepository jpa;
+    private final UserJpaMapper mapper;
+
+    public UserRepositoryAdapter(JpaUserRepository jpa, UserJpaMapper mapper) {
+        this.jpa = jpa;
+        this.mapper = mapper;
+    }
+
+    // ---------- Write ----------
+
+    @Override
+    @Transactional
+    public User save(User user) {
+        UserEntity entity = mapper.toEntity(user);
+        UserEntity saved = jpa.save(entity);
+        return mapper.toDomain(saved);
+    }
+
+    @Override
+    @Transactional
+    public void delete(User user) {
+        jpa.deleteById(user.getId().value());
+    }
+
+    @Override
+    @Transactional
+    public void deleteById(UserId id) {
+        jpa.deleteById(id.value());
+    }
+
+    // ---------- Read ----------
+
+    @Override
+    public Optional<User> findById(UserId id) {
+        return jpa.findById(id.value()).map(mapper::toDomain);
+    }
+
+    @Override
+    public Optional<User> findByUsername(SpaceId spaceId, String username) {
+        return jpa.findBySpaceIdAndUsername(spaceId.value(), username)
+                .map(mapper::toDomain);
+    }
+
+    @Override
+    public Optional<User> findByEmail(SpaceId spaceId, EmailAddress email) {
+        return jpa.findBySpaceIdAndEmailIgnoreCase(spaceId.value(), email.value())
+                .map(mapper::toDomain);
+    }
+
+    @Override
+    public boolean existsByUsernameIgnoreCaseAndIdNot(SpaceId spaceId, String username, UUID excludeId) {
+        return jpa.existsBySpaceIdAndUsernameIgnoreCaseAndIdNot(spaceId.value(), username, excludeId);
+    }
+
+    @Override
+    public boolean existsByEmailIgnoreCaseAndIdNot(SpaceId spaceId, EmailAddress email, UUID excludeId) {
+        return jpa.existsBySpaceIdAndEmailIgnoreCaseAndIdNot(spaceId.value(), email.value(), excludeId);
+    }
+
+    @Override
+    public Page<User> findAllBySpace(SpaceId spaceId, Pageable pageable) {
+        return jpa.findAllBySpaceId(spaceId.value(), pageable)
+                .map(mapper::toDomain);
+    }
+
+    @Override
+    public boolean existsBySpaceAndAccount(SpaceId spaceId, AccountId accountId) {
+        return jpa.existsBySpaceIdAndAccountId(spaceId.value(), accountId.getValue());
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\entity\AccountCredentialsEntity.java =====
+
+package com.takibu.identitycore.infrastructure.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.domain.Persistable;
+
+import java.time.Instant;
+import java.util.UUID;
+
+/**
+ * Credentials avec PK = FK (account_id) et Persistable<UUID> pour forcer INSERT.
+ * AlignÃ© sur le schÃ©ma actuel: pas de colonne 'metadata'.
+ */
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Entity
+@Table(name = "account_credentials")
+public class AccountCredentialsEntity implements Persistable<UUID> {
+
+    /** PK = FK -> accounts.id */
+    @Id
+    @EqualsAndHashCode.Include
+    @Column(name = "account_id", nullable = false, updatable = false, columnDefinition = "BINARY(16)")
+    private UUID id;
+
+    /** Relation lecture seule (FK portÃ©e par id). */
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id", referencedColumnName = "id", insertable = false, updatable = false)
+    private AccountEntity account;
+
+    @Column(name = "password_hash", nullable = false, length = 255)
+    private String passwordHash;
+
+    @Column(name = "password_algo", nullable = false, length = 64)
+    private String passwordAlgo;
+
+    @Column(name = "password_version", nullable = false)
+    private Integer passwordVersion;
+
+    @Column(name = "must_change_next_login", nullable = false)
+    private boolean mustChangeNextLogin;
+
+    @Column(name = "failed_attempts", nullable = false)
+    private Integer failedAttempts;
+
+    @Column(name = "locked_until")
+    private Instant lockedUntil;
+
+    @Column(name = "password_updated_at")
+    private Instant passwordUpdatedAt;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
+
+    @Version
+    @Column(name = "version")
+    private Long version; // wrapper pour "unsaved" = null
+
+    /** Force persist() la 1Ã¨re fois mÃªme si l'ID est dÃ©jÃ  rempli (FK). */
+    @Builder.Default
+    @Transient
+    private boolean isNew = true;
+
+    // --- Persistable ---
+    @Override
+    public UUID getId() { return id; }
+
+    @Override
+    public boolean isNew() { return isNew || version == null; }
+
+    @PostLoad
+    @PostPersist
+    void markNotNew() { this.isNew = false; }
+
+    // Garde-fous si le mapper envoie des nulls :
+    public void setFailedAttempts(Integer failedAttempts) {
+        this.failedAttempts = (failedAttempts == null ? 0 : failedAttempts);
+    }
+    public void setPasswordVersion(Integer passwordVersion) {
+        this.passwordVersion = (passwordVersion == null ? 1 : passwordVersion);
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\entity\AccountEntity.java =====
+
+package com.takibu.identitycore.infrastructure.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import org.springframework.data.domain.Persistable;
+
+import java.time.Instant;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+
+
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Entity
+@Table(name = "accounts")
+public class AccountEntity implements Persistable<UUID> {
+
+    @Id
+    @Column(name = "id", nullable = false, updatable = false, columnDefinition = "BINARY(16)")
+    private UUID id;
+
+    @Version
+    @Column(name = "version")
+    private Long version;
+
+    @Column(name = "email", nullable = false, unique = true, length = 320)
+    private String email;
+
+    @Column(name = "display_name", length = 160)
+    private String displayName;
+
+    @Column(name = "avatar_url", length = 512)
+    private String avatarUrl;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "metadata", columnDefinition = "json")
+    private Map<String, Object> metadata;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
+
+    @Transient
+    private boolean isNew = true;
+
+    @Override
+    public UUID getId() { return id; }
+
+    @Override
+    public boolean isNew() {
+        return isNew || version == null;
+    }
+
+    @PostLoad
+    @PostPersist
+    public void markNotNew() { this.isNew = false; }
+
+    @PrePersist
+    public void prePersist() {
+        if (createdAt == null) {
+            this.createdAt = Instant.now();
+        }
+        if (updatedAt == null) {
+            this.updatedAt = Instant.now();
+        }
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = Instant.now();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AccountEntity that)) return false;
+        return Objects.equals(id, that.id);
+    }
+    @Override
+    public int hashCode() { return Objects.hash(id); }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\entity\GroupEntity.java =====
+
+package com.takibu.identitycore.infrastructure.entity;
+
+import jakarta.persistence.*;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import lombok.*;
+import org.hibernate.annotations.*;
+
+import java.time.Instant;
+import java.util.UUID;
+
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Entity
+@Table(name="`groups`",
+        uniqueConstraints = @UniqueConstraint(name="uk_groups_space_code", columnNames={"space_id","code"}),
+        indexes = {
+                @Index(name="idx_groups_space", columnList="space_id"),
+                @Index(name="idx_groups_space_code", columnList="space_id,code")
+        }
+)
+public class GroupEntity {
+
+    @Id @UuidGenerator
+    @EqualsAndHashCode.Include
+    @Column(name="id", nullable=false, updatable=false)
+    private UUID id;
+
+    @Column(name="space_id", nullable=false, updatable=false)
+    private UUID spaceId;
+
+    @CreationTimestamp
+    @Column(name="created_at", nullable=false, updatable=false)
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name="updated_at", nullable=false)
+    private Instant updatedAt;
+
+    @Version
+    @Column(name="version", nullable=false)
+    private long version;
+
+    @Column(name="code", nullable=false, length=120)
+    private String code;
+
+    @Column(name="name", nullable=false, length=160)
+    private String name;
+
+    @Column(name="description", length=1000)
+    private String description;
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\entity\GroupMemberEntity.java =====
+
+package com.takibu.identitycore.infrastructure.entity;
+
+import jakarta.persistence.*;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import lombok.*;
+import org.hibernate.annotations.*;
+
+import java.time.Instant;
+import java.util.UUID;
+
+import static jakarta.persistence.FetchType.LAZY;
+
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Entity
+@Table(name="group_members",
+        uniqueConstraints = @UniqueConstraint(name="uk_gm_space_group_user", columnNames={"space_id","group_id","user_id"}),
+        indexes = {
+                @Index(name="idx_gm_space", columnList="space_id"),
+                @Index(name="idx_gm_space_group", columnList="space_id,group_id"),
+                @Index(name="idx_gm_space_user", columnList="space_id,user_id")
+        }
+)
+public class GroupMemberEntity {
+
+    @Id @UuidGenerator
+    @EqualsAndHashCode.Include
+    @Column(name="id", nullable=false, updatable=false)
+    private UUID id;
+
+    @Column(name="space_id", nullable=false, updatable=false)
+    private UUID spaceId;
+
+    @CreationTimestamp
+    @Column(name="created_at", nullable=false, updatable=false)
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name="updated_at", nullable=false)
+    private Instant updatedAt;
+
+    @Version
+    @Column(name="version", nullable=false)
+    private long version;
+
+    @Column(name="group_id", nullable=false)
+    private UUID groupId;
+
+    @Column(name="user_id", nullable=false)
+    private UUID userId;
+
+    @Column(name="assigned_at", nullable=false)
+    private Instant assignedAt;
+
+    @Column(name="assigned_by")
+    private UUID assignedBy;
+
+    @ManyToOne(fetch = LAZY, optional = false)
+    @JoinColumns({
+            @JoinColumn(name="space_id", referencedColumnName="space_id", insertable=false, updatable=false),
+            @JoinColumn(name="group_id", referencedColumnName="id",       insertable=false, updatable=false)
+    })
+    private GroupEntity group;
+
+    @ManyToOne(fetch = LAZY, optional = false)
+    @JoinColumns({
+            @JoinColumn(name="space_id", referencedColumnName="space_id", insertable=false, updatable=false),
+            @JoinColumn(name="user_id",  referencedColumnName="id",       insertable=false, updatable=false)
+    })
+    private UserEntity user;
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\entity\GroupRoleEntity.java =====
+
+package com.takibu.identitycore.infrastructure.entity;
+
+import jakarta.persistence.*;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import lombok.*;
+import org.hibernate.annotations.*;
+
+import java.time.Instant;
+import java.util.UUID;
+
+import static jakarta.persistence.FetchType.LAZY;
+
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Entity
+@Table(name="group_roles",
+        uniqueConstraints = @UniqueConstraint(name="uk_gr_space_group_role", columnNames={"space_id","group_id","role_id"}),
+        indexes = {
+                @Index(name="idx_gr_space", columnList="space_id"),
+                @Index(name="idx_gr_space_group", columnList="space_id,group_id"),
+                @Index(name="idx_gr_space_role", columnList="space_id,role_id")
+        }
+)
+public class GroupRoleEntity {
+
+    @Id @UuidGenerator
+    @EqualsAndHashCode.Include
+    @Column(name="id", nullable=false, updatable=false)
+    private UUID id;
+
+    @Column(name="space_id", nullable=false, updatable=false)
+    private UUID spaceId;
+
+    @CreationTimestamp
+    @Column(name="created_at", nullable=false, updatable=false)
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name="updated_at", nullable=false)
+    private Instant updatedAt;
+
+    @Version
+    @Column(name="version", nullable=false)
+    private long version;
+
+    @Column(name="group_id", nullable=false)
+    private UUID groupId;
+
+    @Column(name="role_id", nullable=false)
+    private UUID roleId;
+
+    @Column(name="assigned_at", nullable=false)
+    private Instant assignedAt;
+
+    @Column(name="assigned_by")
+    private UUID assignedBy;
+
+    @ManyToOne(fetch = LAZY, optional = false)
+    @JoinColumns({
+            @JoinColumn(name="space_id", referencedColumnName="space_id", insertable=false, updatable=false),
+            @JoinColumn(name="group_id", referencedColumnName="id",       insertable=false, updatable=false)
+    })
+    private GroupEntity group;
+
+    @ManyToOne(fetch = LAZY, optional = false)
+    @JoinColumns({
+            @JoinColumn(name="space_id", referencedColumnName="space_id", insertable=false, updatable=false),
+            @JoinColumn(name="role_id",  referencedColumnName="id",       insertable=false, updatable=false)
+    })
+    private RoleEntity role;
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\entity\MfaFactorType.java =====
+
+package com.takibu.identitycore.infrastructure.entity;
+
+public enum MfaFactorType {
+    TOTP, WEBAUTHN, SMS, EMAIL, BACKUP_CODE
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\entity\PermissionEffect.java =====
+
+package com.takibu.identitycore.infrastructure.entity;
+
+public enum PermissionEffect {
+    ALLOW, DENY
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\entity\PermissionEntity.java =====
+
+package com.takibu.identitycore.infrastructure.entity;
+
+import jakarta.persistence.*;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import lombok.*;
+import org.hibernate.annotations.*;
+
+import java.time.Instant;
+import java.util.UUID;
+
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Entity
+@Table(name="permissions",
+        uniqueConstraints = @UniqueConstraint(name="uk_permissions_space_code", columnNames={"space_id","code"}),
+        indexes = {
+                @Index(name="idx_permissions_space", columnList="space_id"),
+                @Index(name="idx_permissions_space_code", columnList="space_id,code")
+        }
+)
+public class PermissionEntity {
+
+    @Id @UuidGenerator
+    @EqualsAndHashCode.Include
+    @Column(name="id", nullable=false, updatable=false)
+    private UUID id;
+
+    @Column(name="space_id", nullable=false, updatable=false)
+    private UUID spaceId;
+
+    @CreationTimestamp
+    @Column(name="created_at", nullable=false, updatable=false)
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name="updated_at", nullable=false)
+    private Instant updatedAt;
+
+    @Version
+    @Column(name="version", nullable=false)
+    private long version;
+
+    @Column(name="code", nullable=false, length=160)
+    private String code;
+
+    @Column(name="name", nullable=false, length=160)
+    private String name;
+
+    @Column(name="description", length=1000)
+    private String description;
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\entity\RoleEntity.java =====
+
+package com.takibu.identitycore.infrastructure.entity;
+
+import jakarta.persistence.*;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import lombok.*;
+import org.hibernate.annotations.*;
+
+import java.time.Instant;
+import java.util.UUID;
+
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Entity
+@Table(name="roles",
+        uniqueConstraints = @UniqueConstraint(name="uk_roles_space_code", columnNames={"space_id","code"}),
+        indexes = {
+                @Index(name="idx_roles_space", columnList="space_id"),
+                @Index(name="idx_roles_space_code", columnList="space_id,code")
+        }
+)
+public class RoleEntity {
+
+    @Id @UuidGenerator
+    @EqualsAndHashCode.Include
+    @Column(name="id", nullable=false, updatable=false)
+    private UUID id;
+
+    @Column(name="space_id", nullable=false, updatable=false)
+    private UUID spaceId;
+
+    @CreationTimestamp
+    @Column(name="created_at", nullable=false, updatable=false)
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name="updated_at", nullable=false)
+    private Instant updatedAt;
+
+    @Version
+    @Column(name="version", nullable=false)
+    private long version;
+
+    @Column(name="code", nullable=false, length=120)
+    private String code;
+
+    @Column(name="name", nullable=false, length=160)
+    private String name;
+
+    @Column(name="description", length=1000)
+    private String description;
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\entity\RolePermissionEntity.java =====
+
+package com.takibu.identitycore.infrastructure.entity;
+
+import jakarta.persistence.*;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import lombok.*;
+import org.hibernate.annotations.*;
+
+import java.time.Instant;
+import java.util.UUID;
+
+import static jakarta.persistence.FetchType.LAZY;
+
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Entity
+@Table(name="role_permissions",
+        uniqueConstraints = @UniqueConstraint(name="uk_rp_space_role_perm", columnNames={"space_id","role_id","permission_id"}),
+        indexes = {
+                @Index(name="idx_rp_space", columnList="space_id"),
+                @Index(name="idx_rp_space_role", columnList="space_id,role_id"),
+                @Index(name="idx_rp_space_perm", columnList="space_id,permission_id")
+        }
+)
+public class RolePermissionEntity {
+
+    @Id @UuidGenerator
+    @EqualsAndHashCode.Include
+    @Column(name="id", nullable=false, updatable=false)
+    private UUID id;
+
+    @Column(name="space_id", nullable=false, updatable=false)
+    private UUID spaceId;
+
+    @CreationTimestamp
+    @Column(name="created_at", nullable=false, updatable=false)
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name="updated_at", nullable=false)
+    private Instant updatedAt;
+
+    @Version
+    @Column(name="version", nullable=false)
+    private long version;
+
+    @Column(name="role_id", nullable=false)
+    private UUID roleId;
+
+    @Column(name="permission_id", nullable=false)
+    private UUID permissionId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name="effect", nullable=false, length=8)
+    private PermissionEffect effect; // ALLOW / DENY
+
+    @ManyToOne(fetch = LAZY, optional = false)
+    @JoinColumns({
+            @JoinColumn(name="space_id", referencedColumnName="space_id", insertable=false, updatable=false),
+            @JoinColumn(name="role_id",  referencedColumnName="id",       insertable=false, updatable=false)
+    })
+    private RoleEntity role;
+
+    @ManyToOne(fetch = LAZY, optional = false)
+    @JoinColumns({
+            @JoinColumn(name="space_id",      referencedColumnName="space_id", insertable=false, updatable=false),
+            @JoinColumn(name="permission_id", referencedColumnName="id",       insertable=false, updatable=false)
+    })
+    private PermissionEntity permission;
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\entity\UserEntity.java =====
+
+package com.takibu.identitycore.infrastructure.entity;
+
+import com.takibu.identitycore.domain.model.UserStatus;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.time.Instant;
+import java.util.Map;
+import java.util.UUID;
+
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Entity
+@Table(name = "users",
+       uniqueConstraints = {
+           @UniqueConstraint(name="uk_users_space_username", columnNames={"space_id","username"}),
+           @UniqueConstraint(name="uk_users_space_account",  columnNames={"space_id","account_id"})
+       },
+       indexes = {
+           @Index(name="idx_users_space",        columnList="space_id"),
+           @Index(name="idx_users_space_status", columnList="space_id,status"),
+           @Index(name="idx_users_account",      columnList="account_id")
+       }
+)
+public class UserEntity {
+
+    @Id
+    @EqualsAndHashCode.Include
+    @Column(name = "id", updatable = false, nullable = false)
+    private UUID id;
+
+    /** Lien global vers lâ€™identitÃ© */
+    @Column(name="account_id", nullable=false, updatable=false)
+    private UUID accountId;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name="account_id", referencedColumnName="id", insertable=false, updatable=false)
+    private AccountEntity account;
+
+    /** Scope espace (profil local) */
+    @Column(name="space_id", nullable=false, updatable=false)
+    private UUID spaceId;
+
+    @Column(name="username", nullable=false, length=150)
+    private String username;
+
+    /** DonnÃ©es de prÃ©sentation locales au Space */
+    @Column(name="first_name", length=160)
+    private String firstName;
+
+    @Column(name="last_name", length=160)
+    private String lastName;
+
+    /** Statut dâ€™accÃ¨s pour ce Space */
+    @Enumerated(EnumType.STRING)
+    @Column(name="status", nullable=false, length=32)
+    private UserStatus status;
+
+    /** Overrides locaux */
+    @Builder.Default
+    @Column(name="mfa_enabled", nullable=false)
+    private boolean mfaEnabled = false;
+
+    @Builder.Default
+    @Column(name="password_expired", nullable=false)
+    private boolean passwordExpired = false;
+
+    @Column(name="last_login_at")
+    private Instant lastLoginAt;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name="metadata", columnDefinition = "json")
+    private Map<String, Object> metadata;
+
+    @CreationTimestamp
+    @Column(name="created_at", nullable=false, updatable=false)
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name="updated_at", nullable=false)
+    private Instant updatedAt;
+
+    @Version
+    @Column(name="version", nullable=false)
+    private long version;
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\entity\UserMfaFactorEntity.java =====
+
+package com.takibu.identitycore.infrastructure.entity;
+
+import jakarta.persistence.*;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import lombok.*;
+import org.hibernate.annotations.*;
+
+import java.time.Instant;
+import java.util.UUID;
+
+import static jakarta.persistence.FetchType.LAZY;
+
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Entity
+@Table(name="user_mfa_factors",
+        uniqueConstraints = @UniqueConstraint(name="uk_umf_space_user_label", columnNames={"space_id","user_id","label"}),
+        indexes = {
+                @Index(name="idx_umf_space", columnList="space_id"),
+                @Index(name="idx_umf_space_user", columnList="space_id,user_id"),
+                @Index(name="idx_umf_space_type", columnList="space_id,factor_type")
+        }
+)
+public class UserMfaFactorEntity {
+
+    @Id @UuidGenerator
+    @EqualsAndHashCode.Include
+    @Column(name="id", nullable=false, updatable=false)
+    private UUID id;
+
+    @Column(name="space_id", nullable=false, updatable=false)
+    private UUID spaceId;
+
+    @CreationTimestamp
+    @Column(name="created_at", nullable=false, updatable=false)
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name="updated_at", nullable=false)
+    private Instant updatedAt;
+
+    @Version
+    @Column(name="version", nullable=false)
+    private long version;
+
+    @Column(name="user_id", nullable=false)
+    private UUID userId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name="factor_type", nullable=false, length=20)
+    private MfaFactorType factorType;
+
+    @Column(name="label", length=160)
+    private String label;
+
+    // RecommandÃ©: secret/enrÃ´lement chiffrÃ© cÃ´tÃ© app avant persistance.
+    @Column(name="payload_json", columnDefinition="text")
+    private String payloadJson;
+
+    @Column(name="enabled", nullable=false)
+    private boolean enabled;
+
+    @Column(name="last_used_at")
+    private Instant lastUsedAt;
+
+    @ManyToOne(fetch = LAZY, optional = false)
+    @JoinColumns({
+            @JoinColumn(name="space_id", referencedColumnName="space_id", insertable=false, updatable=false),
+            @JoinColumn(name="user_id",  referencedColumnName="id",       insertable=false, updatable=false)
+    })
+    private UserEntity user;
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\entity\UserPermissionEntity.java =====
+
+package com.takibu.identitycore.infrastructure.entity;
+
+import jakarta.persistence.*;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import lombok.*;
+import org.hibernate.annotations.*;
+
+import java.time.Instant;
+import java.util.UUID;
+
+import static jakarta.persistence.FetchType.LAZY;
+
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Entity
+@Table(name="user_permissions",
+        uniqueConstraints = @UniqueConstraint(name="uk_up_space_user_perm", columnNames={"space_id","user_id","permission_id"}),
+        indexes = {
+                @Index(name="idx_up_space", columnList="space_id"),
+                @Index(name="idx_up_space_user", columnList="space_id,user_id"),
+                @Index(name="idx_up_space_perm", columnList="space_id,permission_id")
+        }
+)
+public class UserPermissionEntity {
+
+    @Id @UuidGenerator
+    @EqualsAndHashCode.Include
+    @Column(name="id", nullable=false, updatable=false)
+    private UUID id;
+
+    @Column(name="space_id", nullable=false, updatable=false)
+    private UUID spaceId;
+
+    @CreationTimestamp
+    @Column(name="created_at", nullable=false, updatable=false)
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name="updated_at", nullable=false)
+    private Instant updatedAt;
+
+    @Version
+    @Column(name="version", nullable=false)
+    private long version;
+
+    @Column(name="user_id", nullable=false)
+    private UUID userId;
+
+    @Column(name="permission_id", nullable=false)
+    private UUID permissionId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name="effect", nullable=false, length=8)
+    private PermissionEffect effect;
+
+    @ManyToOne(fetch = LAZY, optional = false)
+    @JoinColumns({
+            @JoinColumn(name="space_id", referencedColumnName="space_id", insertable=false, updatable=false),
+            @JoinColumn(name="user_id",  referencedColumnName="id",       insertable=false, updatable=false)
+    })
+    private UserEntity user;
+
+    @ManyToOne(fetch = LAZY, optional = false)
+    @JoinColumns({
+            @JoinColumn(name="space_id",      referencedColumnName="space_id", insertable=false, updatable=false),
+            @JoinColumn(name="permission_id", referencedColumnName="id",       insertable=false, updatable=false)
+    })
+    private PermissionEntity permission;
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\entity\UserRecoveryCodeEntity.java =====
+
+package com.takibu.identitycore.infrastructure.entity;
+
+import jakarta.persistence.*;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import lombok.*;
+import org.hibernate.annotations.*;
+
+import java.time.Instant;
+import java.util.UUID;
+
+import static jakarta.persistence.FetchType.LAZY;
+
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Entity
+@Table(name="user_recovery_codes",
+        uniqueConstraints = @UniqueConstraint(name="uk_urc_space_user_code", columnNames={"space_id","user_id","code_hash"}),
+        indexes = {
+                @Index(name="idx_urc_space", columnList="space_id"),
+                @Index(name="idx_urc_space_user", columnList="space_id,user_id")
+        }
+)
+public class UserRecoveryCodeEntity {
+
+    @Id @UuidGenerator
+    @EqualsAndHashCode.Include
+    @Column(name="id", nullable=false, updatable=false)
+    private UUID id;
+
+    @Column(name="space_id", nullable=false, updatable=false)
+    private UUID spaceId;
+
+    @CreationTimestamp
+    @Column(name="created_at", nullable=false, updatable=false)
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name="updated_at", nullable=false)
+    private Instant updatedAt;
+
+    @Version
+    @Column(name="version", nullable=false)
+    private long version;
+
+    @Column(name="user_id", nullable=false)
+    private UUID userId;
+
+    // Stocker le hash (jamais en clair)
+    @Column(name="code_hash", nullable=false, length=255)
+    private String codeHash;
+
+    @Column(name="used", nullable=false)
+    private boolean used;
+
+    @Column(name="used_at")
+    private Instant usedAt;
+
+    @ManyToOne(fetch = LAZY, optional = false)
+    @JoinColumns({
+            @JoinColumn(name="space_id", referencedColumnName="space_id", insertable=false, updatable=false),
+            @JoinColumn(name="user_id",  referencedColumnName="id",       insertable=false, updatable=false)
+    })
+    private UserEntity user;
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\entity\UserRoleEntity.java =====
+
+package com.takibu.identitycore.infrastructure.entity;
+
+import jakarta.persistence.*;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import lombok.*;
+import org.hibernate.annotations.*;
+
+import java.time.Instant;
+import java.util.UUID;
+
+import static jakarta.persistence.FetchType.LAZY;
+
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Entity
+@Table(name="user_roles",
+        uniqueConstraints = @UniqueConstraint(name="uk_ur_space_user_role", columnNames={"space_id","user_id","role_id"}),
+        indexes = {
+                @Index(name="idx_ur_space", columnList="space_id"),
+                @Index(name="idx_ur_space_user", columnList="space_id,user_id"),
+                @Index(name="idx_ur_space_role", columnList="space_id,role_id")
+        }
+)
+public class UserRoleEntity {
+
+    @Id
+    @Column(name = "id", updatable = false, nullable = false, unique = true, columnDefinition = "binary(16)")
+    private UUID id;
+
+    @Column(name="space_id", nullable=false, updatable=false)
+    private UUID spaceId;
+
+    @CreationTimestamp
+    @Column(name="created_at", nullable=false, updatable=false)
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name="updated_at", nullable=false)
+    private Instant updatedAt;
+
+    @Version
+    @Column(name="version", nullable=false)
+    private long version;
+
+    @Column(name="user_id", nullable=false)
+    private UUID userId;
+
+    @Column(name="role_id", nullable=false)
+    private UUID roleId;
+
+    @Column(name="assigned_at", nullable=false)
+    private Instant assignedAt;
+
+    @Column(name="assigned_by")
+    private UUID assignedBy;
+
+    @ManyToOne(fetch = LAZY, optional = false)
+    @JoinColumns({
+            @JoinColumn(name="space_id", referencedColumnName="space_id", insertable=false, updatable=false),
+            @JoinColumn(name="user_id",  referencedColumnName="id",       insertable=false, updatable=false)
+    })
+    private UserEntity user;
+
+    @ManyToOne(fetch = LAZY, optional = false)
+    @JoinColumns({
+            @JoinColumn(name="space_id", referencedColumnName="space_id", insertable=false, updatable=false),
+            @JoinColumn(name="role_id",  referencedColumnName="id",       insertable=false, updatable=false)
+    })
+    private RoleEntity role;
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\jpa\mapper\AccountCredentialsJpaMapper.java =====
+
+package com.takibu.identitycore.infrastructure.jpa.mapper;
+
+import com.takibu.identitycore.domain.model.AccountCredentials;
+import com.takibu.identitycore.domain.model.AccountId;
+import com.takibu.identitycore.infrastructure.entity.AccountCredentialsEntity;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+import org.mapstruct.ReportingPolicy;
+
+import java.util.UUID;
+
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.ERROR)
+public  interface AccountCredentialsJpaMapper {
+
+        @Mapping(target = "id", source = "accountId.value")
+        @Mapping(target = "passwordHash",
+                expression = "java(source.getPasswordHash() == null ? null : source.getPasswordHash().getHash())")
+        @Mapping(target = "passwordAlgo",
+                expression = "java(source.getPasswordHash() == null ? null : source.getPasswordHash().getAlgo())")
+        @Mapping(target = "passwordVersion",
+                expression = "java(source.getPasswordHash() == null ? 1 : source.getPasswordHash().getVersion())")
+        @Mapping(target = "mustChangeNextLogin", source = "mustChangeNextLogin")
+        @Mapping(target = "failedAttempts", source = "failedAttempts")
+        @Mapping(target = "lockedUntil", source = "lockedUntil")
+        @Mapping(target = "passwordUpdatedAt", source = "passwordUpdatedAt")
+        @Mapping(target = "createdAt", ignore = true)
+        @Mapping(target = "updatedAt", ignore = true)
+        @Mapping(target = "version", ignore = true)
+        @Mapping(target = "account", ignore = true)
+        @Mapping(target = "isNew", ignore = true)
+        AccountCredentialsEntity toEntity(AccountCredentials source);
+
+        @Mapping(target = "accountId", source = "id", qualifiedByName = "toAccountId")
+        @Mapping(target = "passwordHash",
+                expression = "java(com.takibu.identitycore.domain.model.PasswordHash.of(" +
+                        "entity.getPasswordHash()," +
+                        "entity.getPasswordAlgo()," +
+                        "(entity.getPasswordVersion() == null ? 1 : entity.getPasswordVersion())))")
+        @Mapping(target = "mustChangeNextLogin", source = "mustChangeNextLogin")
+        @Mapping(target = "failedAttempts", source = "failedAttempts")
+        @Mapping(target = "lockedUntil", source = "lockedUntil")
+        @Mapping(target = "passwordUpdatedAt", source = "passwordUpdatedAt")
+        @Mapping(target = "createdAt", source = "createdAt")
+        @Mapping(target = "updatedAt", source = "updatedAt")
+        @Mapping(target = "version", source = "version")
+        AccountCredentials toDomain(AccountCredentialsEntity entity);
+
+        @Named("toAccountId")
+        default AccountId toAccountId(UUID id) {
+            return id == null ? null : new AccountId(id);
+        }
+
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\jpa\mapper\AccountJpaMapper.java =====
+
+package com.takibu.identitycore.infrastructure.jpa.mapper;
+
+import com.takibu.identitycore.domain.model.Account;
+import com.takibu.identitycore.domain.model.AccountId;
+import com.takibu.identitycore.domain.model.EmailAddress;
+import com.takibu.identitycore.infrastructure.entity.AccountEntity;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+import org.mapstruct.ReportingPolicy;
+
+import java.util.UUID;
+
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.ERROR)
+public interface AccountJpaMapper {
+
+// ===== Domain -> JPA =====
+    @Mapping(target = "id",          source = "id.value")
+    @Mapping(target = "email",       source = "email.value")
+    @Mapping(target = "displayName", source = "displayName")
+    @Mapping(target = "avatarUrl",   source = "avatarUrl")
+    @Mapping(target = "metadata",    source = "metadata")
+
+    // GÃ©rÃ©s par JPA : on laisse null pour forcer INSERT & timestamps DB
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "version",   ignore = true)
+
+    // Transient Persistable flag (prÃ©sent dans l'entitÃ©)
+    @Mapping(target = "isNew", ignore = true)
+    AccountEntity toEntity(Account account);
+
+// ===== JPA -> Domain =====
+    @Mapping(target = "id",          source = "id",    qualifiedByName = "toAccountId")
+    @Mapping(target = "email",       source = "email", qualifiedByName = "toEmailAddress")
+    @Mapping(target = "displayName", source = "displayName")
+    @Mapping(target = "avatarUrl",   source = "avatarUrl")
+    @Mapping(target = "metadata",    source = "metadata")
+    @Mapping(target = "createdAt",   source = "createdAt")
+    @Mapping(target = "updatedAt",   source = "updatedAt")
+    @Mapping(target = "version",     source = "version")
+    Account toDomain(AccountEntity entity);
+
+// ===== Helpers =====
+    @Named("toAccountId")
+    default AccountId toAccountId(UUID id) {
+        return (id == null) ? null : new AccountId(id);
+    }
+
+    @Named("toEmailAddress")
+    default EmailAddress toEmailAddress(String email) {
+        return (email == null) ? null : new EmailAddress(email);
+    }
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\jpa\mapper\UserJpaMapper.java =====
+
+package com.takibu.identitycore.infrastructure.jpa.mapper;
+
+import com.takibu.identitycore.domain.model.*;
+import com.takibu.identitycore.infrastructure.entity.UserEntity;
+import org.mapstruct.*;
+
+import java.util.UUID;
+
+@Mapper(
+        componentModel = "spring",
+        unmappedTargetPolicy = ReportingPolicy.ERROR
+)
+public interface UserJpaMapper {
+
+    @Mapping(target = "id", source = "id.value")
+    @Mapping(target = "spaceId", source = "spaceId.value")
+    @Mapping(target = "accountId", source = "accountId.value")
+    @Mapping(target = "username", source = "username")
+    @Mapping(target = "firstName", source = "firstName")
+    @Mapping(target = "lastName", source = "lastName")
+    @Mapping(target = "status", source = "status")
+    @Mapping(target = "mfaEnabled", source = "mfaEnabled")
+    @Mapping(target = "passwordExpired", source = "passwordExpired")
+    @Mapping(target = "lastLoginAt", source = "lastLoginAt")
+    @Mapping(target = "metadata", source = "metadata")
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "version", ignore = true)
+    @Mapping(target = "account", ignore = true)
+    UserEntity toEntity(User user);
+
+    @InheritInverseConfiguration(name = "toEntity")
+    @Mapping(target = "createdAt", source = "createdAt")
+    @Mapping(target = "updatedAt", source = "updatedAt")
+    @Mapping(target = "version", source = "version")
+    User toDomain(UserEntity entity);
+
+    default UUID map(UserId id) {
+        return id == null ? null : id.value();
+    }
+
+    default UserId mapUserId(UUID u) {
+        return u == null ? null : new UserId(u);
+    }
+
+    default UUID map(SpaceId id) {
+        return id == null ? null : id.value();
+    }
+
+    default SpaceId mapSpaceId(UUID u) {
+        return u == null ? null : new SpaceId(u);
+    }
+
+    default UUID map(AccountId id) {
+        return id == null ? null : id.getValue();
+    }
+
+    default AccountId mapAccountId(UUID u) {
+        return u == null ? null : new AccountId(u);
+    }
+
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\jpa\repository\GroupJpaRepository.java =====
+
+package com.takibu.identitycore.infrastructure.jpa.repository;
+
+import com.takibu.identitycore.infrastructure.entity.GroupEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.*;
+
+public interface GroupJpaRepository extends JpaRepository<GroupEntity, UUID> {
+    Optional<GroupEntity> findBySpaceIdAndCode(UUID spaceId, String code);
+    List<GroupEntity> findBySpaceIdAndCodeIn(UUID spaceId, Collection<String> codes);
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\jpa\repository\GroupMemberJpaRepository.java =====
+
+package com.takibu.identitycore.infrastructure.jpa.repository;
+
+import com.takibu.identitycore.infrastructure.entity.GroupMemberEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.UUID;
+
+public interface GroupMemberJpaRepository extends JpaRepository<GroupMemberEntity, UUID> {
+    boolean existsBySpaceIdAndUserIdAndGroupId(UUID spaceId, UUID userId, UUID groupId);
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\jpa\repository\JpaAccountCredentialsRepository.java =====
+
+package com.takibu.identitycore.infrastructure.jpa.repository;
+
+
+import com.takibu.identitycore.infrastructure.entity.AccountCredentialsEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.UUID;
+
+
+@Repository
+public interface JpaAccountCredentialsRepository extends JpaRepository<AccountCredentialsEntity, UUID> {
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\jpa\repository\JpaAccountRepository.java =====
+
+package com.takibu.identitycore.infrastructure.jpa.repository;
+
+
+import com.takibu.identitycore.infrastructure.entity.AccountEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+
+import java.util.Optional;
+import java.util.UUID;
+
+
+@Repository
+public interface JpaAccountRepository extends JpaRepository<AccountEntity, UUID> {
+    Optional<AccountEntity> findByEmailIgnoreCase(String email);
+    boolean existsByEmailIgnoreCase(String email);
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\jpa\repository\JpaUserRepository.java =====
+
+package com.takibu.identitycore.infrastructure.jpa.repository;
+
+import com.takibu.identitycore.infrastructure.entity.UserEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+import java.util.UUID;
+
+@Repository
+public interface JpaUserRepository extends JpaRepository<UserEntity, UUID>, JpaSpecificationExecutor<UserEntity> {
+
+    /* ---------- Username (propriÃ©tÃ© sur UserEntity) ---------- */
+
+    // unicitÃ© username dans un space (CREATE)
+    boolean existsBySpaceIdAndUsernameIgnoreCase(UUID spaceId, String username);
+
+    // unicitÃ© username dans un space en excluant un user (UPDATE)
+    boolean existsBySpaceIdAndUsernameIgnoreCaseAndIdNot(UUID spaceId, String username, UUID excludeUserId);
+
+    // (optionnel) lookup direct
+    Optional<UserEntity> findBySpaceIdAndUsername(UUID spaceId, String username);
+
+
+    /* ---------- Email (portÃ© par Account, donc via JOIN) ---------- */
+
+    @Query("""
+           select u
+             from UserEntity u
+             join u.account a
+            where u.spaceId = :spaceId
+              and lower(a.email) = lower(:email)
+           """)
+    Optional<UserEntity> findBySpaceIdAndEmailIgnoreCase(@Param("spaceId") UUID spaceId,
+                                                         @Param("email") String email);
+
+    @Query("""
+           select (count(u) > 0)
+             from UserEntity u
+             join u.account a
+            where u.spaceId = :spaceId
+              and lower(a.email) = lower(:email)
+              and u.id <> :excludeId
+           """)
+    boolean existsBySpaceIdAndEmailIgnoreCaseAndIdNot(@Param("spaceId") UUID spaceId,
+                                                      @Param("email") String email,
+                                                      @Param("excludeId") UUID excludeId);
+
+
+    /* ---------- Profil par (space, account) â€” logique V2 ---------- */
+
+    boolean existsBySpaceIdAndAccountId(UUID spaceId, UUID accountId);
+
+
+    /* ---------- Divers ---------- */
+
+    Page<UserEntity> findAllBySpaceId(UUID spaceId, Pageable pageable);
+
+    // garde-les si ton adapter les appelle; sinon supprime
+    @Modifying
+    @Query(value = "DELETE FROM user_group_memberships WHERE user_id = :userId", nativeQuery = true)
+    void deleteUserGroups(UUID userId);
+
+    @Modifying
+    @Query(value = "DELETE FROM user_roles WHERE user_id = :userId", nativeQuery = true)
+    void deleteUserRoles(UUID userId);
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\jpa\repository\RoleJpaRepository.java =====
+
+package com.takibu.identitycore.infrastructure.jpa.repository;
+
+import com.takibu.identitycore.infrastructure.entity.RoleEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.*;
+
+public interface RoleJpaRepository extends JpaRepository<RoleEntity, UUID> {
+    Optional<RoleEntity> findBySpaceIdAndCode(UUID spaceId, String code);
+    List<RoleEntity> findBySpaceIdAndCodeIn(UUID spaceId, Collection<String> codes);
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\jpa\repository\UserRoleJpaRepository.java =====
+
+package com.takibu.identitycore.infrastructure.jpa.repository;
+
+import com.takibu.identitycore.infrastructure.entity.UserRoleEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.UUID;
+
+public interface UserRoleJpaRepository extends JpaRepository<UserRoleEntity, UUID> {
+    boolean existsBySpaceIdAndUserIdAndRoleId(UUID spaceId, UUID userId, UUID roleId);
+}
+
+// ===== D:\Takibu\Takibu-IAM\identity-core\src\main\java\com\takibu\identitycore\infrastructure\security\SpringPasswordHasher.java =====
+
+package com.takibu.identitycore.infrastructure.security;
+
+import com.takibu.identitycore.domain.model.PasswordHasher;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+
+@Component
+public class SpringPasswordHasher implements PasswordHasher {
+    private final PasswordEncoder encoder;
+    public SpringPasswordHasher(PasswordEncoder encoder) { this.encoder = encoder; }
+    @Override public String hash(String raw) { return encoder.encode(raw); }
+}
+
+// =============================================================
+// Add User V2 Endpoint â€” Account + User (Single-call onboarding)

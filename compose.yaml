@@ -1,0 +1,18 @@
+services:
+  sftp-server:
+    build:
+      context: .
+    container_name: sftp-server
+    environment:
+      AUTH_MODE: both
+      SFTP_PORT: 2222
+      WEB_PORT: 8080
+      SFTP_ROOT: /data
+      PROTECT_LOCAL_STORAGE: "true"
+      ENABLE_WEB_UI: "true"
+      SFTP_USERS: "user=password;admin=admin123"
+    ports:
+      - "2222:2222"
+      - "8080:8080"
+    volumes:
+      - ./docker-data:/data

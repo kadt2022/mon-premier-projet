@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crochet SFTP</title>
+    <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+<div class="scene scene-top"></div>
+<div class="scene scene-bottom"></div>
+
+<div class="shell">
+    <header class="hero reveal">
+        <div>
+            <p class="eyebrow">Crochet / Pont de Commandement</p>
+            <h1 id="hero-title">Le coffre SFTP prend forme</h1>
+            <p id="hero-tagline" class="hero-copy">
+                Une premiere facade pour voir les flux, les acces et la gouvernance avant les futures API metier.
+            </p>
+        </div>
+        <div class="status-column">
+            <div class="status-chip">
+                <span class="status-dot"></span>
+                Maquette vivante
+            </div>
+            <button id="refresh-button" class="ghost-button" type="button">Rafraichir le pont</button>
+        </div>
+    </header>
+
+    <section id="login-card" class="login-card reveal">
+        <div class="login-copy">
+            <p class="eyebrow">Acces securise</p>
+            <h2>Entrer dans l'espace de demonstration</h2>
+            <p>
+                Cette interface reutilise les comptes du serveur SFTP pour donner un premier visage au produit.
+            </p>
+        </div>
+        <form id="login-form" class="login-form">
+            <label>
+                Utilisateur
+                <input id="username" name="username" type="text" autocomplete="username" placeholder="user" required>
+            </label>
+            <label>
+                Mot de passe
+                <input id="password" name="password" type="password" autocomplete="current-password" placeholder="password" required>
+            </label>
+            <button class="primary-button" type="submit">Monter a bord</button>
+            <p id="login-message" class="login-message">Utilisez un compte configure cote serveur.</p>
+        </form>
+    </section>
+
+    <main id="app-shell" class="app-shell hidden">
+        <aside class="sidebar reveal">
+            <div class="brand-block">
+                <p class="eyebrow">Navigation</p>
+                <h2>Carte du royaume</h2>
+                <p>Une vue simple pour parcourir les zones du produit.</p>
+            </div>
+            <nav class="nav-list">
+                <button class="nav-item active" data-view="overview" type="button">Vue d'ensemble</button>
+                <button class="nav-item" data-view="files" type="button">Explorateur</button>
+                <button class="nav-item" data-view="admin" type="button">Administration</button>
+                <button class="nav-item" data-view="audit" type="button">Audit</button>
+            </nav>
+            <section class="sidebar-panel">
+                <p class="eyebrow">Session</p>
+                <div id="session-badge" class="session-badge">Non connecte</div>
+                <p id="summary-brief" class="sidebar-note">Chargement des informations systeme.</p>
+            </section>
+        </aside>
+
+        <section class="content">
+            <section class="content-header reveal">
+                <div>
+                    <p class="eyebrow">Plateforme</p>
+                    <h2 id="active-view-title">Vue d'ensemble</h2>
+                </div>
+                <div id="platform-badges" class="platform-badges"></div>
+            </section>
+
+            <section data-panel="overview" class="panel active">
+                <div id="summary-cards" class="card-grid"></div>
+                <div class="double-grid">
+                    <article class="info-card reveal">
+                        <p class="eyebrow">Vision produit</p>
+                            <h3>Le moteur et la forme commencent a se rejoindre</h3>
+                        <p id="product-subtitle">
+                            Cette maquette sert a visualiser les parcours, a reveler les besoins d'API et a donner une base de discussion.
+                        </p>
+                    </article>
+                    <article class="info-card reveal">
+                        <p class="eyebrow">Chantiers visibles</p>
+                        <ul id="roadmap-list" class="roadmap-list"></ul>
+                    </article>
+                </div>
+            </section>
+
+            <section data-panel="files" class="panel">
+                <div class="explorer-grid">
+                    <article class="info-card reveal">
+                        <div class="panel-head">
+                            <div>
+                                <p class="eyebrow">Explorateur</p>
+                                <h3>Arborescence des depots</h3>
+                            </div>
+                        </div>
+                        <div id="file-tree" class="file-tree"></div>
+                    </article>
+                    <article class="info-card detail-card reveal">
+                        <p class="eyebrow">Fiche</p>
+                        <h3 id="file-detail-name">Selectionnez un element</h3>
+                        <dl id="file-detail" class="detail-list"></dl>
+                    </article>
+                </div>
+            </section>
+
+            <section data-panel="admin" class="panel">
+                <div class="double-grid">
+                    <article class="info-card reveal">
+                        <p class="eyebrow">Utilisateurs</p>
+                        <h3>Comptes et espaces</h3>
+                        <div id="admin-users" class="stack-list"></div>
+                    </article>
+                    <article class="info-card reveal">
+                        <p class="eyebrow">Roles et groupes</p>
+                        <h3>Premiere maquette de gouvernance</h3>
+                        <div id="admin-governance" class="governance-grid"></div>
+                    </article>
+                </div>
+            </section>
+
+            <section data-panel="audit" class="panel">
+                <article class="info-card reveal">
+                    <p class="eyebrow">Audit</p>
+                    <h3>Chronologie des acces et des actions</h3>
+                    <div id="audit-timeline" class="audit-timeline"></div>
+                </article>
+            </section>
+        </section>
+    </main>
+</div>
+
+<script src="/assets/app.js"></script>
+</body>
+</html>
