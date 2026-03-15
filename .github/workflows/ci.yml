@@ -103,6 +103,8 @@ jobs:
     steps:
       - name: Récupérer le code
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Installer Java 17
         uses: actions/setup-java@v5
@@ -117,3 +119,137 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: ./gradlew build sonar
+
+  quality-gate:
+    needs: sonar
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Installer jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Vérifier le Quality Gate et les règles personnalisées
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+        run: |
+          set -euo pipefail
+
+          SONAR_HOST_URL="https://sonarcloud.io"
+
+          if [ -z "${SONAR_TOKEN:-}" ] || [ -z "${SONAR_PROJECT_KEY:-}" ]; then
+            echo "Variables manquantes : SONAR_TOKEN ou SONAR_PROJECT_KEY"
+            exit 1
+          fi
+
+          AUTH="$(printf "%s:" "$SONAR_TOKEN" | base64 | tr -d '\n')"
+
+          get_json() {
+            local url="$1"
+            curl -fsS -H "Authorization: Basic $AUTH" "$url"
+          }
+
+          get_metric() {
+            local json="$1"
+            local metric="$2"
+            echo "$json" | jq -r --arg metric "$metric" '
+              (.component.measures[]? | select(.metric == $metric) | .value) // "0"
+            ' | head -n 1
+          }
+
+          echo "Vérification du statut Quality Gate..."
+          project_status_json="$(get_json "$SONAR_HOST_URL/api/qualitygates/project_status?projectKey=$SONAR_PROJECT_KEY")"
+          quality_status="$(echo "$project_status_json" | jq -r '.projectStatus.status')"
+
+          echo "Quality Gate Sonar : $quality_status"
+
+          if [ "$quality_status" != "OK" ]; then
+            echo "BLOCK: le Quality Gate Sonar a échoué."
+            exit 1
+          fi
+
+          echo "Lecture des métriques..."
+          measures_json="$(get_json "$SONAR_HOST_URL/api/measures/component?component=$SONAR_PROJECT_KEY&metricKeys=new_bugs,new_vulnerabilities,new_security_hotspots_reviewed,new_coverage,new_duplicated_lines_density,coverage,code_smells")"
+
+          new_bugs="$(get_metric "$measures_json" "new_bugs")"
+          new_vulnerabilities="$(get_metric "$measures_json" "new_vulnerabilities")"
+          new_hotspots_reviewed="$(get_metric "$measures_json" "new_security_hotspots_reviewed")"
+          new_coverage="$(get_metric "$measures_json" "new_coverage")"
+          new_dup="$(get_metric "$measures_json" "new_duplicated_lines_density")"
+          coverage="$(get_metric "$measures_json" "coverage")"
+          code_smells="$(get_metric "$measures_json" "code_smells")"
+
+          echo "Métriques récupérées :"
+          echo "  new_bugs=$new_bugs"
+          echo "  new_vulnerabilities=$new_vulnerabilities"
+          echo "  new_security_hotspots_reviewed=$new_hotspots_reviewed"
+          echo "  new_coverage=$new_coverage"
+          echo "  new_duplicated_lines_density=$new_dup"
+          echo "  coverage=$coverage"
+          echo "  code_smells=$code_smells"
+
+          fail=0
+
+          check_gt() {
+            local value="$1"
+            local limit="$2"
+            local label="$3"
+            awk "BEGIN { exit !($value > $limit) }" && {
+              echo "BLOCK: $label ($value > $limit)"
+              fail=1
+            } || true
+          }
+
+          check_lt() {
+            local value="$1"
+            local limit="$2"
+            local label="$3"
+            awk "BEGIN { exit !($value < $limit) }" && {
+              echo "BLOCK: $label ($value < $limit)"
+              fail=1
+            } || true
+          }
+
+          check_neq() {
+            local value="$1"
+            local expected="$2"
+            local label="$3"
+            [ "$value" != "$expected" ] && {
+              echo "BLOCK: $label ($value != $expected)"
+              fail=1
+            } || true
+          }
+
+          warn_lt() {
+            local value="$1"
+            local limit="$2"
+            local label="$3"
+            awk "BEGIN { exit !($value < $limit) }" && {
+              echo "WARN: $label ($value < $limit)"
+            } || true
+          }
+
+          warn_gt() {
+            local value="$1"
+            local limit="$2"
+            local label="$3"
+            awk "BEGIN { exit !($value > $limit) }" && {
+              echo "WARN: $label ($value > $limit)"
+            } || true
+          }
+
+          check_gt "$new_bugs" 0 "new_bugs"
+          check_gt "$new_vulnerabilities" 0 "new_vulnerabilities"
+          check_lt "$new_coverage" 80 "new_coverage"
+          check_gt "$new_dup" 3 "new_duplicated_lines_density"
+          check_neq "$new_hotspots_reviewed" "100" "new_security_hotspots_reviewed"
+
+          warn_lt "$coverage" 60 "coverage globale"
+          warn_gt "$code_smells" 200 "code_smells globaux"
+
+          if [ "$fail" -eq 1 ]; then
+            echo "Policy Gate: FAILED"
+            exit 1
+          fi
+
+          echo "Policy Gate: PASSED"
