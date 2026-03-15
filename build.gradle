@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'org.sonarqube' version "7.2.3.7755"
 }
 
 group = 'com.example'
@@ -36,6 +37,14 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testImplementation 'com.jcraft:jsch:0.1.55'
+}
+
+sonar {
+    properties {
+        property "sonar.projectKey", "kadt2022_mon-premier-projet"
+        property "sonar.organization", "kadt2022"
+        property "sonar.host.url", "https://sonarcloud.io"
+    }
 }
 
 test {
