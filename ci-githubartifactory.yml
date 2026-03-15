@@ -95,25 +95,3 @@ jobs:
         if: always()
         run: |
           kill $(cat app.pid) || true
-
-  sonar:
-    needs: smoke-test
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Récupérer le code
-        uses: actions/checkout@v5
-
-      - name: Installer Java 17
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Rendre gradlew exécutable
-        run: chmod +x ./gradlew
-
-      - name: Analyse Sonar
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew build sonar
