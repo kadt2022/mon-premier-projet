@@ -131,7 +131,7 @@ jobs:
       - name: Vérifier le Quality Gate et les règles personnalisées
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+          SONAR_PROJECT_KEY:  kadt2022_mon-premier-projet
         run: |
           set -euo pipefail
 
