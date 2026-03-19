@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'jacoco'
     id 'org.sonarqube' version "7.2.3.7755"
 }
 
@@ -53,6 +54,49 @@ test {
         events 'passed', 'skipped', 'failed'
     }
 }
+
+jacoco {
+    toolVersion = '0.8.12'
+}
+
+def coverageExclusions = [
+        'com/example/sftp/SftpServerApp.class',
+        'com/example/sftp/LocalStorageSecurity.class'
+]
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: coverageExclusions)
+        }))
+    }
+}
+
+jacocoTestCoverageVerification {
+    dependsOn test
+    violationRules {
+        rule {
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.80
+            }
+        }
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: coverageExclusions)
+        }))
+    }
+}
+
+test.finalizedBy jacocoTestReport
+check.dependsOn jacocoTestCoverageVerification
 
 // CrÃƒÂ©e un fat-jar exÃƒÂ©cutable
 jar {

@@ -38,7 +38,7 @@ jobs:
           name: app-jar
           path: build/libs/*.jar
 
-  smoke-test:
+  Build-Verification-Tests:
     needs: build
     runs-on: ubuntu-latest
 
@@ -97,7 +97,7 @@ jobs:
           kill $(cat app.pid) || true
 
   sonar:
-    needs: smoke-test
+    needs: Build-Verification-Tests
     runs-on: ubuntu-latest
 
     steps:
