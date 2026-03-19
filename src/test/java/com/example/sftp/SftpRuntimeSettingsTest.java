@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class SftpRuntimeSettingsTest {
 
@@ -77,5 +78,65 @@ class SftpRuntimeSettingsTest {
                 SftpRuntimeSettings.from(new String[0], Map.of("SFTP_PORT", "99999")));
         assertThrows(IllegalArgumentException.class, () ->
                 SftpRuntimeSettings.from(new String[0], Map.of("SFTP_USERS", "alice")));
+    }
+
+    @Test
+    @DisplayName("toServerConfig produit une configuration coherente avec les parametres")
+    void toServerConfigMapsAllFields() {
+        SftpRuntimeSettings settings = SftpRuntimeSettings.from(
+                new String[]{"password", "2022", "./my-root"},
+                Map.of(
+                        "SFTP_USERS", "alice=secret",
+                        "PROTECT_LOCAL_STORAGE", "false"));
+
+        SftpServerConfig config = settings.toServerConfig();
+
+        assertEquals(2022, config.getPort());
+        assertEquals("./my-root", config.getRootDirectory());
+        assertEquals(SftpServerConfig.AuthMode.PASSWORD, config.getAuthMode());
+        assertFalse(config.isProtectLocalStorage());
+        assertEquals("secret", config.getUsers().get("alice"));
+        assertNotNull(config);
+    }
+
+    @Test
+    @DisplayName("parseAuthMode reconnait le mode password")
+    void parsesPasswordAuthMode() {
+        assertEquals(SftpServerConfig.AuthMode.PASSWORD,
+                SftpRuntimeSettings.parseAuthMode("password"));
+        assertEquals(SftpServerConfig.AuthMode.PASSWORD,
+                SftpRuntimeSettings.parseAuthMode("PASSWORD"));
+    }
+
+    @Test
+    @DisplayName("parseBoolean accepte toutes les valeurs vraies")
+    void parseBooleanAcceptsTruthyValues() {
+        assertTrue(SftpRuntimeSettings.parseBoolean("true", false));
+        assertTrue(SftpRuntimeSettings.parseBoolean("1", false));
+        assertTrue(SftpRuntimeSettings.parseBoolean("yes", false));
+        assertTrue(SftpRuntimeSettings.parseBoolean("y", false));
+        assertTrue(SftpRuntimeSettings.parseBoolean("on", false));
+    }
+
+    @Test
+    @DisplayName("parseBoolean rejette une valeur inconnue")
+    void parseBooleanRejectsUnknownValue() {
+        assertThrows(IllegalArgumentException.class, () ->
+                SftpRuntimeSettings.parseBoolean("maybe", false));
+    }
+
+    @Test
+    @DisplayName("parseUsers ignore les entrees vides dans la chaine")
+    void parseUsersSkipsEmptyEntries() {
+        Map<String, String> users = SftpRuntimeSettings.parseUsers(";alice=secret;");
+        assertEquals(1, users.size());
+        assertEquals("secret", users.get("alice"));
+    }
+
+    @Test
+    @DisplayName("parseUsers rejette une chaine ne contenant que des separateurs")
+    void parseUsersThrowsWhenNoValidEntry() {
+        assertThrows(IllegalArgumentException.class, () ->
+                SftpRuntimeSettings.parseUsers(";;"));
     }
 }

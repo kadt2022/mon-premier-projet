@@ -19,7 +19,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -158,6 +160,68 @@ class SftpServerTest {
         } finally {
             deleteDirectory(keyRoot);
         }
+    }
+
+    @Test
+    @DisplayName("Un serveur non demarre n'est pas en cours d'execution")
+    void serverNotRunningBeforeStart() {
+        SftpServerConfig config = new SftpServerConfig()
+                .setPort(3333)
+                .setRootDirectory(rootDir.toString())
+                .setProtectLocalStorage(false)
+                .addUser("u", "p");
+        SftpServer newServer = new SftpServer(config);
+
+        assertFalse(newServer.isRunning());
+        assertEquals(3333, newServer.getPort());
+    }
+
+    @Test
+    @DisplayName("Arreter un serveur jamais demarre ne lance pas d'exception")
+    void stopNonStartedServerIsNoOp() {
+        SftpServerConfig config = new SftpServerConfig()
+                .setPort(0)
+                .setRootDirectory(rootDir.toString())
+                .setProtectLocalStorage(false)
+                .addUser("u", "p");
+        SftpServer newServer = new SftpServer(config);
+
+        assertDoesNotThrow(newServer::stop);
+    }
+
+    @Test
+    @DisplayName("resolveBoundPort retourne le port de config quand le serveur SSH est null")
+    void resolveBoundPortWithNullSshServer() throws Exception {
+        SftpServerConfig config = new SftpServerConfig()
+                .setPort(2345)
+                .setRootDirectory(rootDir.toString())
+                .setProtectLocalStorage(false)
+                .addUser("u", "p");
+        SftpServer newServer = new SftpServer(config);
+
+        java.lang.reflect.Method method =
+                SftpServer.class.getDeclaredMethod("resolveBoundPort");
+        method.setAccessible(true);
+        int port = (int) method.invoke(newServer);
+
+        assertEquals(2345, port);
+    }
+
+    @Test
+    @DisplayName("La traversee de chemin est bloquee")
+    void pathTraversalIsBlocked() throws Exception {
+        ChannelSftp sftp = openSftpChannel("testuser", "testpass");
+        try {
+            assertThrows(Exception.class, () -> sftp.ls("../../"));
+        } finally {
+            disconnect(sftp);
+        }
+    }
+
+    @Test
+    @DisplayName("Connexion refusee pour un utilisateur inexistant")
+    void rejectUnknownUser() {
+        assertThrows(JSchException.class, () -> openSftpChannel("nope", "anypass"));
     }
 
     private ChannelSftp openSftpChannel(String user, String password) throws JSchException {
