@@ -86,6 +86,26 @@ public final class LocalStorageSecurity {
         }
     }
 
+    /**
+     * Rejects identities that contain characters which could alter the icacls command line.
+     * ProcessBuilder does not invoke a shell, but icacls itself parses its arguments and
+     * could misinterpret certain sequences.  Keeping identities to printable ASCII without
+     * shell metacharacters is a conservative, safe policy.
+     */
+    private static void validateIdentity(String value) throws IOException {
+        if (value == null || value.isBlank()) {
+            throw new IOException("L'identite du compte d'execution est vide");
+        }
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if (c < 0x20 || "&|;<>(){}[]$`\"'\r\n\0".indexOf(c) >= 0) {
+                throw new IOException(
+                        "L'identite du compte contient un caractere non autorise (U+"
+                                + Integer.toHexString(c).toUpperCase(Locale.ROOT) + "): " + value);
+            }
+        }
+    }
+
     private static String resolveRuntimeIdentity(Path path) throws IOException {
         String runtimeUser = System.getProperty("user.name", "").trim();
         if (!runtimeUser.isBlank()) {
@@ -94,7 +114,9 @@ public final class LocalStorageSecurity {
                         .getUserPrincipalLookupService()
                         .lookupPrincipalByName(runtimeUser);
                 if (principal != null && principal.getName() != null && !principal.getName().isBlank()) {
-                    return principal.getName();
+                    String identity = principal.getName();
+                    validateIdentity(identity);
+                    return identity;
                 }
             } catch (IOException ignored) {
                 // Fall back to the folder owner if name resolution fails.
@@ -105,15 +127,17 @@ public final class LocalStorageSecurity {
         if (owner == null || owner.getName() == null || owner.getName().isBlank()) {
             throw new IOException("Impossible de determiner le compte Windows a autoriser pour " + path);
         }
-        return owner.getName();
+        String identity = owner.getName();
+        validateIdentity(identity);
+        return identity;
     }
 
     private static void restrictAcl(Path path, boolean directory, String runtimeIdentity) throws IOException {
         runIcacls(path, buildGrantArguments(directory, runtimeIdentity));
-        runIcacls(path, buildInheritanceArguments(directory));
+        runIcacls(path, buildInheritanceArguments());
     }
 
-    private static List<String> buildInheritanceArguments(boolean directory) {
+    private static List<String> buildInheritanceArguments() {
         List<String> args = new ArrayList<>();
         args.add("/inheritance:r");
         return args;
