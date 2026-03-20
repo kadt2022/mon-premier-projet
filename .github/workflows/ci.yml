@@ -82,7 +82,7 @@ jobs:
           exit 1
 
       - name: Installer Newman
-        run: npm install -g newman
+        run: npm install -g newman --ignore-scripts
 
       - name: Exécuter la collection Postman
         run: newman run postman/smoke.postman_collection.json --env-var baseUrl=http://127.0.0.1:8080
