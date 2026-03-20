@@ -45,6 +45,9 @@ sonar {
         property "sonar.projectKey", "kadt2022_mon-premier-projet"
         property "sonar.organization", "kadt2022"
         property "sonar.host.url", "https://sonarcloud.io"
+        // Align with the JaCoCo exclusions so Sonar does not show 0 % for files
+        // that are intentionally excluded from coverage reporting.
+        property "sonar.coverage.exclusions", "**/SftpServerApp.java,**/LocalStorageSecurity.java"
     }
 }
 
