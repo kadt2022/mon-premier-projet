@@ -8,14 +8,15 @@ on:
 
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
 
     steps:
       - name: Récupérer le code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Installer Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
@@ -34,7 +35,7 @@ jobs:
         run: ./gradlew jar
 
       - name: Upload jar artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: app-jar
           path: build/libs/*.jar
@@ -46,22 +47,22 @@ jobs:
 
     steps:
       - name: Récupérer le code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Installer Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
           cache: gradle
 
       - name: Installer Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
 
       - name: Download jar artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: app-jar
           path: build/libs
@@ -100,17 +101,18 @@ jobs:
           kill $(cat app.pid) || true
 
   sonar:
+    name: Sonar Analysis
     needs: bvt
     runs-on: ubuntu-latest
 
     steps:
       - name: Récupérer le code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Installer Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
@@ -119,15 +121,13 @@ jobs:
       - name: Rendre gradlew exécutable
         run: chmod +x ./gradlew
 
-      - name: Build (requis par Sonar)
-        run: ./gradlew clean build
-
-      - name: Analyse Sonar
+      - name: Build + analyse Sonar
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew sonar
+        run: ./gradlew clean build sonar
 
   quality-gate:
+    name: Quality Gate
     needs: sonar
     runs-on: ubuntu-latest
 
@@ -164,19 +164,35 @@ jobs:
             ' | head -n 1
           }
 
+          rating_letter() {
+            case "$1" in
+              1|1.0) echo "A" ;;
+              2|2.0) echo "B" ;;
+              3|3.0) echo "C" ;;
+              4|4.0) echo "D" ;;
+              5|5.0) echo "E" ;;
+              *) echo "N/A" ;;
+            esac
+          }
+
+          rating_comment() {
+            case "$1" in
+              A) echo "Excellent : niveau très satisfaisant." ;;
+              B) echo "Correct : quelques améliorations souhaitables." ;;
+              C) echo "Mauvais : niveau insuffisant, à corriger." ;;
+              D) echo "Critique : qualité dégradée." ;;
+              E) echo "Très critique : intervention prioritaire requise." ;;
+              *) echo "Non disponible." ;;
+            esac
+          }
+
           echo "Vérification du statut Quality Gate..."
           project_status_json="$(get_json "$SONAR_HOST_URL/api/qualitygates/project_status?projectKey=$SONAR_PROJECT_KEY")"
           quality_status="$(echo "$project_status_json" | jq -r '.projectStatus.status')"
-
           echo "Quality Gate Sonar : $quality_status"
 
-          if [ "$quality_status" != "OK" ]; then
-            echo "BLOCK: le Quality Gate Sonar a échoué."
-            exit 1
-          fi
-
           echo "Lecture des métriques..."
-          measures_json="$(get_json "$SONAR_HOST_URL/api/measures/component?component=$SONAR_PROJECT_KEY&metricKeys=new_bugs,new_vulnerabilities,new_security_hotspots_reviewed,new_coverage,new_duplicated_lines_density,coverage,code_smells")"
+          measures_json="$(get_json "$SONAR_HOST_URL/api/measures/component?component=$SONAR_PROJECT_KEY&metricKeys=new_bugs,new_vulnerabilities,new_security_hotspots_reviewed,new_coverage,new_duplicated_lines_density,coverage,code_smells,security_rating,reliability_rating,sqale_rating")"
 
           new_bugs="$(get_metric "$measures_json" "new_bugs")"
           new_vulnerabilities="$(get_metric "$measures_json" "new_vulnerabilities")"
@@ -186,6 +202,18 @@ jobs:
           coverage="$(get_metric "$measures_json" "coverage")"
           code_smells="$(get_metric "$measures_json" "code_smells")"
 
+          security_rating_raw="$(get_metric "$measures_json" "security_rating")"
+          reliability_rating_raw="$(get_metric "$measures_json" "reliability_rating")"
+          maintainability_rating_raw="$(get_metric "$measures_json" "sqale_rating")"
+
+          security_rating="$(rating_letter "$security_rating_raw")"
+          reliability_rating="$(rating_letter "$reliability_rating_raw")"
+          maintainability_rating="$(rating_letter "$maintainability_rating_raw")"
+
+          security_comment="$(rating_comment "$security_rating")"
+          reliability_comment="$(rating_comment "$reliability_rating")"
+          maintainability_comment="$(rating_comment "$maintainability_rating")"
+
           echo "Métriques récupérées :"
           echo "  new_bugs=$new_bugs"
           echo "  new_vulnerabilities=$new_vulnerabilities"
@@ -194,46 +222,62 @@ jobs:
           echo "  new_duplicated_lines_density=$new_dup"
           echo "  coverage=$coverage"
           echo "  code_smells=$code_smells"
+          echo "  security_rating=$security_rating"
+          echo "  reliability_rating=$reliability_rating"
+          echo "  maintainability_rating=$maintainability_rating"
 
           fail=0
+          summary="PASS"
+          comments='[]'
+
+          add_comment() {
+            local message="$1"
+            comments="$(echo "$comments" | jq --arg msg "$message" '. + [$msg]')"
+          }
 
           check_gt() {
-            local value="$1"
-            local limit="$2"
-            local label="$3"
+            local value="$1" limit="$2" label="$3"
             awk "BEGIN { exit !($value > $limit) }" && {
               echo "BLOCK: $label ($value > $limit)"
               fail=1
+              summary="FAIL"
+              add_comment "$label trop élevé"
             } || true
           }
 
           check_lt() {
-            local value="$1"
-            local limit="$2"
-            local label="$3"
+            local value="$1" limit="$2" label="$3"
             awk "BEGIN { exit !($value < $limit) }" && {
               echo "BLOCK: $label ($value < $limit)"
               fail=1
+              summary="FAIL"
+              add_comment "$label trop faible"
             } || true
           }
 
           warn_lt() {
-            local value="$1"
-            local limit="$2"
-            local label="$3"
+            local value="$1" limit="$2" label="$3"
             awk "BEGIN { exit !($value < $limit) }" && {
               echo "WARN: $label ($value < $limit)"
+              [ "$summary" = "PASS" ] && summary="WARN"
+              add_comment "$label inférieur au seuil recommandé"
             } || true
           }
 
           warn_gt() {
-            local value="$1"
-            local limit="$2"
-            local label="$3"
+            local value="$1" limit="$2" label="$3"
             awk "BEGIN { exit !($value > $limit) }" && {
               echo "WARN: $label ($value > $limit)"
+              [ "$summary" = "PASS" ] && summary="WARN"
+              add_comment "$label supérieur au seuil recommandé"
             } || true
           }
+
+          if [ "$quality_status" != "OK" ]; then
+            fail=1
+            summary="FAIL"
+            add_comment "Le Quality Gate Sonar a échoué"
+          fi
 
           check_gt "$new_bugs" 0 "new_bugs"
           check_gt "$new_vulnerabilities" 0 "new_vulnerabilities"
@@ -247,10 +291,75 @@ jobs:
           if [ "$new_hotspots_reviewed" != "0" ] && [ "$new_hotspots_reviewed" != "100" ]; then
             echo "BLOCK: new_security_hotspots_reviewed ($new_hotspots_reviewed != 100)"
             fail=1
+            summary="FAIL"
+            add_comment "Tous les nouveaux hotspots de sécurité ne sont pas revus"
           fi
 
           warn_lt "$coverage" 60 "coverage globale"
           warn_gt "$code_smells" 200 "code_smells globaux"
+
+          jq -n \
+            --arg qualityGate "$quality_status" \
+            --arg summary "$summary" \
+            --arg securityRating "$security_rating" \
+            --arg securityComment "$security_comment" \
+            --arg reliabilityRating "$reliability_rating" \
+            --arg reliabilityComment "$reliability_comment" \
+            --arg maintainabilityRating "$maintainability_rating" \
+            --arg maintainabilityComment "$maintainability_comment" \
+            --argjson newBugs "$new_bugs" \
+            --argjson newVulnerabilities "$new_vulnerabilities" \
+            --argjson newCoverage "$new_coverage" \
+            --argjson newDup "$new_dup" \
+            --argjson newHotspotsReviewed "$new_hotspots_reviewed" \
+            --argjson coverage "$coverage" \
+            --argjson codeSmells "$code_smells" \
+            --argjson comments "$comments" \
+            '{
+              qualityGate: $qualityGate,
+              summary: $summary,
+              ratings: {
+                security: { value: $securityRating, comment: $securityComment },
+                reliability: { value: $reliabilityRating, comment: $reliabilityComment },
+                maintainability: { value: $maintainabilityRating, comment: $maintainabilityComment }
+              },
+              newCode: {
+                bugs: $newBugs,
+                vulnerabilities: $newVulnerabilities,
+                coverage: $newCoverage,
+                duplication: $newDup,
+                hotspotsReviewed: $newHotspotsReviewed
+              },
+              global: {
+                coverage: $coverage,
+                codeSmells: $codeSmells
+              },
+              comments: $comments
+            }' > quality-gate-report.json
+
+          echo "Rapport JSON :"
+          jq . quality-gate-report.json
+
+          {
+            echo "## Quality Gate"
+            echo ""
+            echo "- Statut Sonar : **$quality_status**"
+            echo "- Résumé : **$summary**"
+            echo "- Security : **$security_rating** — $security_comment"
+            echo "- Reliability : **$reliability_rating** — $reliability_comment"
+            echo "- Maintainability : **$maintainability_rating** — $maintainability_comment"
+            echo ""
+            echo "### New Code"
+            echo "- Bugs : $new_bugs"
+            echo "- Vulnerabilities : $new_vulnerabilities"
+            echo "- Coverage : $new_coverage"
+            echo "- Duplication : $new_dup"
+            echo "- Hotspots reviewed : $new_hotspots_reviewed"
+            echo ""
+            echo "### Global"
+            echo "- Coverage : $coverage"
+            echo "- Code smells : $code_smells"
+          } >> "$GITHUB_STEP_SUMMARY"
 
           if [ "$fail" -eq 1 ]; then
             echo "Policy Gate: FAILED"
@@ -258,3 +367,10 @@ jobs:
           fi
 
           echo "Policy Gate: PASSED"
+
+      - name: Upload du rapport Quality Gate
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: quality-gate-report
+          path: quality-gate-report.json
