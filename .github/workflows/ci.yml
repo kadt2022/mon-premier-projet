@@ -192,13 +192,15 @@ jobs:
           echo "Quality Gate Sonar : $quality_status"
 
           echo "Lecture des métriques..."
-          measures_json="$(get_json "$SONAR_HOST_URL/api/measures/component?component=$SONAR_PROJECT_KEY&metricKeys=new_bugs,new_vulnerabilities,new_security_hotspots_reviewed,new_coverage,new_duplicated_lines_density,coverage,code_smells,security_rating,reliability_rating,sqale_rating")"
+          measures_json="$(get_json "$SONAR_HOST_URL/api/measures/component?component=$SONAR_PROJECT_KEY&metricKeys=new_bugs,new_vulnerabilities,new_security_hotspots_reviewed,security_hotspots_reviewed,new_coverage,new_duplicated_lines_density,duplicated_lines_density,coverage,code_smells,security_rating,reliability_rating,sqale_rating")"
 
           new_bugs="$(get_metric "$measures_json" "new_bugs")"
           new_vulnerabilities="$(get_metric "$measures_json" "new_vulnerabilities")"
           new_hotspots_reviewed="$(get_metric "$measures_json" "new_security_hotspots_reviewed")"
+          hotspots_reviewed="$(get_metric "$measures_json" "security_hotspots_reviewed")"
           new_coverage="$(get_metric "$measures_json" "new_coverage")"
           new_dup="$(get_metric "$measures_json" "new_duplicated_lines_density")"
+          duplication="$(get_metric "$measures_json" "duplicated_lines_density")"
           coverage="$(get_metric "$measures_json" "coverage")"
           code_smells="$(get_metric "$measures_json" "code_smells")"
 
@@ -218,8 +220,10 @@ jobs:
           echo "  new_bugs=$new_bugs"
           echo "  new_vulnerabilities=$new_vulnerabilities"
           echo "  new_security_hotspots_reviewed=$new_hotspots_reviewed"
+          echo "  security_hotspots_reviewed=$hotspots_reviewed"
           echo "  new_coverage=$new_coverage"
           echo "  new_duplicated_lines_density=$new_dup"
+          echo "  duplicated_lines_density=$duplication"
           echo "  coverage=$coverage"
           echo "  code_smells=$code_smells"
           echo "  security_rating=$security_rating"
@@ -313,6 +317,8 @@ jobs:
             --argjson newDup "$new_dup" \
             --argjson newHotspotsReviewed "$new_hotspots_reviewed" \
             --argjson coverage "$coverage" \
+            --argjson duplication "$duplication" \
+            --argjson hotspotsReviewed "$hotspots_reviewed" \
             --argjson codeSmells "$code_smells" \
             --argjson comments "$comments" \
             '{
@@ -323,6 +329,11 @@ jobs:
                 reliability: { value: $reliabilityRating, comment: $reliabilityComment },
                 maintainability: { value: $maintainabilityRating, comment: $maintainabilityComment }
               },
+              keyIndicators: {
+                hotspotsReviewed: $hotspotsReviewed,
+                coverage: $coverage,
+                duplications: $duplication
+              },
               newCode: {
                 bugs: $newBugs,
                 vulnerabilities: $newVulnerabilities,
@@ -332,6 +343,8 @@ jobs:
               },
               global: {
                 coverage: $coverage,
+                duplication: $duplication,
+                hotspotsReviewed: $hotspotsReviewed,
                 codeSmells: $codeSmells
               },
               comments: $comments
@@ -345,9 +358,16 @@ jobs:
             echo ""
             echo "- Statut Sonar : **$quality_status**"
             echo "- Résumé : **$summary**"
+            echo ""
+            echo "### Ratings"
             echo "- Security : **$security_rating** — $security_comment"
             echo "- Reliability : **$reliability_rating** — $reliability_comment"
             echo "- Maintainability : **$maintainability_rating** — $maintainability_comment"
+            echo ""
+            echo "### Key Indicators"
+            echo "- Hotspots Reviewed : **$hotspots_reviewed%**"
+            echo "- Coverage : **$coverage%**"
+            echo "- Duplications : **$duplication%**"
             echo ""
             echo "### New Code"
             echo "- Bugs : $new_bugs"
@@ -358,6 +378,8 @@ jobs:
             echo ""
             echo "### Global"
             echo "- Coverage : $coverage"
+            echo "- Duplications : $duplication"
+            echo "- Hotspots Reviewed : $hotspots_reviewed"
             echo "- Code smells : $code_smells"
           } >> "$GITHUB_STEP_SUMMARY"
 
